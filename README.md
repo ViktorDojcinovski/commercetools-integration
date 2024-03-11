@@ -2,9 +2,9 @@
 
 This application is built as an extension to the starter template, provided by commercetools.
 
-Please find More info on the following link [connect applications](https://marketplace.commercetools.com/) and in the instructions section below.
+Please find more info on this [link] (https://marketplace.commercetools.com/) and in the Instructions section below.
 
-Please adhere to the recommendations from the Architecture principles for building a connect application below.
+Please adhere to the recommendations from the Architecture principles for building a connect application section below.
 
 ## Instructions
 

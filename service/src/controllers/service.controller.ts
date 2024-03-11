@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { apiSuccess } from '../api/success.api';
 import CustomError from '../errors/custom.error';
-import { cartController } from './cart.controller';
+import axiosClient from '../api/axios-client.api';
 
 /**
  * Exposed service endpoint.
@@ -44,6 +44,16 @@ export const post = async (request: Request, response: Response) => {
 
 const orderController = async (resource: any) => {
   try {
+    const virtualStockApiClient = await axiosClient({
+      baseURL: process.env.VS_API_URL!,
+      headers: {
+        auth: `${process.env.VS_USERNAME}:${process.env.VS_PASSWORD}`,
+        'Content-Type': 'application/json',
+      },
+    });
+    // TO DO: Map the resource to the virtual stock order API
+    const response = await virtualStockApiClient.post('/order', resource);
+
     const data = {
       statusCode: 200,
       actions: [],

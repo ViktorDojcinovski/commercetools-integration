@@ -1,40 +1,25 @@
 import * as dotenv from 'dotenv';
-dotenv.config();
-
-import express, { Express } from 'express';
-import bodyParser from 'body-parser';
-
-// Import routes
-import ServiceRoutes from './routes/service.route';
+import { app } from './app';
 
 // Import logger
 import { logger } from './utils/logger.utils';
 
-import { readConfiguration } from './utils/config.utils';
-import { errorMiddleware } from './middleware/error.middleware';
+dotenv.config();
 
-// Read env variables
-readConfiguration();
+const PORT = process.env.PORT || 8080;
 
-const PORT = 8080;
+const start = async () => {
+  if (
+    !process.env.VS_API_URL ||
+    !process.env.VS_USERNAME ||
+    !process.env.VS_PASSWORD
+  ) {
+    throw new Error('Missing environment variables');
+  }
 
-// Create the express app
-const app: Express = express();
-app.disable('x-powered-by');
+  app.listen(PORT, () => {
+    logger.info(`⚡️ Service application listening on port ${PORT}`);
+  });
+};
 
-// Define configurations
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
-
-// Define routes
-app.use('/service', ServiceRoutes);
-
-// Global error handler
-app.use(errorMiddleware);
-
-// Listen the application
-const server = app.listen(PORT, () => {
-  logger.info(`⚡️ Service application listening on port ${PORT}`);
-});
-
-export default server;
+start();

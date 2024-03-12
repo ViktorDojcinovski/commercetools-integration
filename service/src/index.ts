@@ -1,10 +1,7 @@
-import * as dotenv from 'dotenv';
 import { app } from './app';
 
 // Import logger
 import { logger } from './utils/logger.utils';
-
-dotenv.config();
 
 const PORT = process.env.PORT || 8080;
 

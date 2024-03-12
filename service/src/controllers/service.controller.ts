@@ -1,7 +1,10 @@
 import { Request, Response } from 'express';
+import { Axios } from 'axios';
+
 import { apiSuccess } from '../api/success.api';
 import CustomError from '../errors/custom.error';
 import axiosClient from '../api/axios-client.api';
+import { OrderControllerResponse } from '../types/serviceController.type';
 
 /**
  * Exposed service endpoint.
@@ -12,7 +15,7 @@ import axiosClient from '../api/axios-client.api';
  * @param {Response} response The express response
  * @returns
  */
-export const post = async (request: Request, response: Response) => {
+const post = async (request: Request, response: Response) => {
   const { resource } = request.body;
 
   if (!resource) {
@@ -27,7 +30,15 @@ export const post = async (request: Request, response: Response) => {
   }
 
   try {
-    const data = await orderController(resource);
+    const virtualStockApiClient = axiosClient({
+      baseURL: process.env.VS_API_URL!,
+      headers: {
+        auth: `${process.env.VS_USERNAME}:${process.env.VS_PASSWORD}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    const data = await orderController(resource, virtualStockApiClient);
 
     if (data && data.statusCode === 200) {
       apiSuccess(200, data.actions, response);
@@ -42,17 +53,19 @@ export const post = async (request: Request, response: Response) => {
   }
 };
 
-const orderController = async (resource: any) => {
+/**
+ *
+ * @param resource
+ * @param client
+ * @returns OrderControllerResponse
+ */
+const orderController = async (
+  resource: any,
+  client: Axios
+): Promise<OrderControllerResponse> => {
   try {
-    const virtualStockApiClient = await axiosClient({
-      baseURL: process.env.VS_API_URL!,
-      headers: {
-        auth: `${process.env.VS_USERNAME}:${process.env.VS_PASSWORD}`,
-        'Content-Type': 'application/json',
-      },
-    });
     // TO DO: Map the resource to the virtual stock order API
-    const response = await virtualStockApiClient.post('/order', resource);
+    const response = await client.post('/order', resource);
 
     const data = {
       statusCode: 200,
@@ -60,5 +73,9 @@ const orderController = async (resource: any) => {
     };
 
     return data;
-  } catch (error) {}
+  } catch (error: any) {
+    throw new CustomError(500, error.message);
+  }
 };
+
+export { post, orderController };

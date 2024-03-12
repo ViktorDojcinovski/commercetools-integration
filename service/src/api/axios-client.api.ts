@@ -6,8 +6,10 @@ interface ICLient {
 }
 
 export default ({ baseURL, headers }: ICLient) => {
-  return axios.create({
+  const client = axios.create({
     baseURL,
     headers,
   });
+
+  return client;
 };

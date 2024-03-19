@@ -112,21 +112,21 @@ export const optional =
     ];
   };
 
-export const array =
-  (fn) =>
-  (...args) => {
-    const [path, validators] = fn(...args);
-    return [
-      path,
-      validators.map(([fn, message, validatorArgs]) => [
-        (value, ...args) =>
-          Array.isArray(value) &&
-          value.every((value) => fn(...[value, ...args])),
-        message,
-        validatorArgs,
-      ]),
-    ];
-  };
+// export const array =
+//   (fn) =>
+//   (...args) => {
+//     const [path, validators] = fn(...args);
+//     return [
+//       path,
+//       validators.map(([fn, message, validatorArgs]) => [
+//         (value, ...args) =>
+//           Array.isArray(value) &&
+//           value.every((value) => fn(...[value, ...args])),
+//         message,
+//         validatorArgs,
+//       ]),
+//     ];
+//   };
 
 export const region: ValidatorCreator = (path, message) => [
   path,

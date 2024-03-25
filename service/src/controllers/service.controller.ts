@@ -8,6 +8,8 @@ import axiosClient from '../api/axios-client.api';
 import { OrderControllerResponse, RequestBody } from '../types/order.types';
 import { virtualStockApi_v4 } from '../consts/virtualstock.const';
 import { mapOrder, mapChannel } from '../utils/order.utils';
+import { refreshToken } from '../utils/refreshToken.utils';
+import { logger } from '../utils/logger.utils';
 
 /**
  * Exposed service endpoint.
@@ -23,37 +25,35 @@ const post = async (request: Request, response: Response) => {
   const { resource } = body;
 
   if (!resource) {
-    throw new CustomError(
-      400,
-      'Bad request - Missing body resource parameter.'
-    );
+    throw new CustomError(400, 'Bad request. Missing body resource parameter.');
   }
 
   if (resource.typeId !== 'order') {
     throw new CustomError(400, `Bad request. Allowed value is 'order'.`);
   }
 
-  try {
-    const virtualStockApiClient = axiosClient({
-      baseURL: virtualStockApi_v4,
-      auth: {
-        username: process.env.CTP_VS_USERNAME ?? '',
-        password: process.env.CTP_VS_PASSWORD ?? '',
-      },
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+  const virtualStockApiClient = axiosClient({
+    baseURL: virtualStockApi_v4,
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${process.env.AUTH_TOKEN}`,
+    },
+  });
 
+  try {
     const data = await orderController(body, virtualStockApiClient);
 
     if (data && data.statusCode === 200) {
-      apiSuccess(200, data.actions, response);
+      apiSuccess(data.statusCode, data.actions, response);
       return;
     }
-  } catch (error) {
+  } catch (error: any) {
     if (error instanceof Error) {
-      throw new CustomError(500, error.message);
+      throw new CustomError(
+        (error as CustomError).statusCode || 500,
+        error.message,
+        (error as CustomError).errors
+      );
     }
   }
 };
@@ -69,27 +69,67 @@ const orderController = async (
   client: Axios
 ): Promise<OrderControllerResponse> => {
   const updateActions: Array<UpdateAction> = [];
+  const supplierRestID = await mapChannel(
+    Object.keys(body.order.lineItems[0].variant.availability.channels)[0]
+  );
+  const order = mapOrder(body, supplierRestID);
+
   try {
-    const supplierRestID = await mapChannel(
-      Object.keys(body.order.lineItems[0].variant.availability.channels)[0]
-    );
-    const order = mapOrder(body, supplierRestID);
     await client.post('/orders/?format=json', order);
-    const updateAction: UpdateAction = {
-      action: 'dispatchOrderToVirtualStock',
-      updateProductData: false,
-    };
-    updateActions.push(updateAction);
-
-    const data = {
-      statusCode: 200,
-      actions: updateActions,
-    };
-
-    return data;
   } catch (error: any) {
-    throw new CustomError(500, error.message);
+    if (error.response) {
+      const {
+        response: { status },
+      } = error;
+
+      switch (status) {
+        case 500:
+          logger.error(
+            'error.response.data.error: ',
+            JSON.stringify(error.response.data.error)
+          );
+          throw new CustomError(
+            500,
+            'Failed to process the order.',
+            error.response.data.error
+          );
+        case 401: {
+          logger.info('...refreshing token');
+          try {
+            const updatedClient = await refreshToken(client);
+            await updatedClient.post('/orders/?format=json', order);
+
+            break;
+          } catch (error: any) {
+            throw new CustomError(
+              error.response.status,
+              'Failed to refresh token or to process the order. Please try again later.',
+              error.response.data.error
+            );
+          }
+        }
+        default:
+          throw new CustomError(status, error.response.data.error);
+      }
+    } else {
+      throw new CustomError(
+        500,
+        'Internal server error. Please try again later.'
+      );
+    }
   }
+  const updateAction: UpdateAction = {
+    action: 'dispatchOrderToVirtualStock',
+    updateProductData: false,
+  };
+  updateActions.push(updateAction);
+
+  const data = {
+    statusCode: 200,
+    actions: updateActions,
+  };
+
+  return data;
 };
 
 export { post, orderController };

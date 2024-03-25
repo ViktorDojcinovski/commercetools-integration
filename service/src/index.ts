@@ -19,16 +19,22 @@ const start = async () => {
       'Content-Type': 'application/json',
     },
   });
-  const response = await virtualStockClient.post('/token', {
-    username: process.env.CTP_VS_USERNAME ?? '',
-    password: process.env.CTP_VS_PASSWORD ?? '',
-  });
 
-  if (response.status !== 200) {
-    logger.error(
-      'Failed to authenticate with virtual stock API. PLease check your credentials.'
-    );
-    process.exit(1);
+  if (!process.env.AUTH_TOKEN || !process.env.REFRESH_TOKEN) {
+    const response = await virtualStockClient.post('/token', {
+      username: process.env.CTP_VS_USERNAME ?? '',
+      password: process.env.CTP_VS_PASSWORD ?? '',
+    });
+
+    if (response.status !== 200) {
+      logger.error(
+        'Failed to authenticate with virtual stock API. Please check your credentials.'
+      );
+      process.exit(1);
+    }
+
+    process.env.AUTH_TOKEN = response.data.access;
+    process.env.REFRESH_TOKEN = response.data.refresh;
   }
 
   app.listen(PORT, () => {

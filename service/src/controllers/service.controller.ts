@@ -77,6 +77,11 @@ const orderController = async (
   const updateActions: Array<UpdateAction> = [];
   //LOGGER
   logger.info('Before mapChannel');
+  logger.info(JSON.stringify(body.order));
+  logger.info(body.order.lineItems[0]);
+  logger.info(body.order.lineItems[0].variant);
+  logger.info(body.order.lineItems[0].variant.availability);
+  logger.info(body.order.lineItems[0].variant.availability.channels);
   const supplierRestID = await mapChannel(
     Object.keys(body.order.lineItems[0].variant.availability.channels)[0]
   );

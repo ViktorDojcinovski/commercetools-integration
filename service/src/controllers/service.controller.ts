@@ -24,9 +24,6 @@ const post = async (request: Request, response: Response) => {
   const { body } = request;
   const { resource } = body;
 
-  //LOGGER
-  logger.info(JSON.stringify(body));
-
   if (!resource) {
     throw new CustomError(400, 'Bad request. Missing body resource parameter.');
   }
@@ -34,10 +31,6 @@ const post = async (request: Request, response: Response) => {
   if (resource.typeId !== 'order') {
     throw new CustomError(400, `Bad request. Allowed value is 'order'.`);
   }
-  //LOGGER
-  logger.info(JSON.stringify(body));
-  logger.info(virtualStockApi_v4);
-  logger.info(process.env.AUTH_TOKEN);
 
   const virtualStockApiClient = axiosClient({
     baseURL: virtualStockApi_v4,
@@ -46,8 +39,6 @@ const post = async (request: Request, response: Response) => {
       Authorization: `Bearer ${process.env.AUTH_TOKEN}`,
     },
   });
-
-  logger.info('virtualStockApiClient: ', virtualStockApiClient);
 
   try {
     const data = await orderController(body, virtualStockApiClient);
@@ -78,25 +69,14 @@ const orderController = async (
   client: Axios
 ): Promise<OrderControllerResponse> => {
   const updateActions: Array<UpdateAction> = [];
-  //LOGGER
-  logger.info('Before mapChannel');
   const supplierRestID = await mapChannel(
     Object.keys(body.resource.obj.lineItems[0].variant.availability.channels)[0]
   );
-  //LOGGER
-  logger.info('After mapChannel supplierRestID');
-  logger.info(supplierRestID);
   const order = mapOrder(body, supplierRestID);
-
-  //LOGGER
-  logger.info('Order mapped: ');
-  logger.info(JSON.stringify(order));
 
   try {
     await client.post('/orders/?format=json', order);
   } catch (error: any) {
-    //LOGGER
-    logger.error('Error processing order (inside catch block): ', error);
     if (error.response) {
       const {
         response: { status },
@@ -104,10 +84,6 @@ const orderController = async (
 
       switch (status) {
         case 500:
-          logger.error(
-            'error.response.data.error: ',
-            JSON.stringify(error.response.data.error)
-          );
           throw new CustomError(
             500,
             'Failed to process the order.',
@@ -132,8 +108,6 @@ const orderController = async (
           throw new CustomError(status, error.response.data.error);
       }
     } else {
-      //LOGGER
-      logger.error('Error processing order (inside else block): ', error);
       throw new CustomError(
         500,
         'Internal server error. Please try again later.'
@@ -141,7 +115,7 @@ const orderController = async (
     }
   }
   const updateAction: UpdateAction = {
-    action: 'dispatchOrderToVirtualStock',
+    action: 'Create',
     updateProductData: false,
   };
   updateActions.push(updateAction);

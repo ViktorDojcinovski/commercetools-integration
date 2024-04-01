@@ -52,9 +52,6 @@ const mapOrder = (body: RequestBody, supplierRestID: string) => {
 };
 
 const mapChannel = async (channelId: string) => {
-  //LOGGER
-  logger.info('Before createApiRoot');
-  logger.info(channelId);
   const channel = await createApiRoot()
     .channels()
     .withId({ ID: channelId })

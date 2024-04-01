@@ -31,6 +31,8 @@ const post = async (request: Request, response: Response) => {
   if (resource.typeId !== 'order') {
     throw new CustomError(400, `Bad request. Allowed value is 'order'.`);
   }
+  //LOGGER
+  logger.info('Order received: ', JSON.stringify(body));
 
   const virtualStockApiClient = axiosClient({
     baseURL: virtualStockApi_v4,
@@ -74,9 +76,14 @@ const orderController = async (
   );
   const order = mapOrder(body, supplierRestID);
 
+  //LOGGER
+  logger.info('Order mapped: ', JSON.stringify(order));
+
   try {
     await client.post('/orders/?format=json', order);
   } catch (error: any) {
+    //LOGGER
+    logger.error('Error processing order (inside catch block): ', error);
     if (error.response) {
       const {
         response: { status },
@@ -112,6 +119,8 @@ const orderController = async (
           throw new CustomError(status, error.response.data.error);
       }
     } else {
+      //LOGGER
+      logger.error('Error processing order (inside else block): ', error);
       throw new CustomError(
         500,
         'Internal server error. Please try again later.'

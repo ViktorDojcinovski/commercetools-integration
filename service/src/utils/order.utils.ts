@@ -1,6 +1,7 @@
 import { createApiRoot } from '../client/create.client';
 import { edgeApi_v4 } from '../consts/virtualstock.const';
 import { LineItem, RequestBody } from '../types/order.types';
+import { logger } from './logger.utils';
 
 const mapOrder = (body: RequestBody, supplierRestID: string) => {
   const {
@@ -51,12 +52,16 @@ const mapOrder = (body: RequestBody, supplierRestID: string) => {
 };
 
 const mapChannel = async (channelId: string) => {
+  //LOGGER
+  logger.info('Before createApiRoot');
+  logger.info(channelId);
   const channel = await createApiRoot()
     .channels()
     .withId({ ID: channelId })
     .get()
     .execute();
 
+  logger.info(channel.body.key);
   return `${edgeApi_v4}/suppliers/${channel.body.key}/`;
 };
 

@@ -33,6 +33,8 @@ const post = async (request: Request, response: Response) => {
   }
   //LOGGER
   logger.info('Order received: ', JSON.stringify(body));
+  logger.info('virtualStockApi_v4: ', virtualStockApi_v4);
+  logger.info('process.env.AUTH_TOKEN: ', process.env.AUTH_TOKEN);
 
   const virtualStockApiClient = axiosClient({
     baseURL: virtualStockApi_v4,
@@ -41,6 +43,8 @@ const post = async (request: Request, response: Response) => {
       Authorization: `Bearer ${process.env.AUTH_TOKEN}`,
     },
   });
+
+  logger.info('virtualStockApiClient: ', virtualStockApiClient);
 
   try {
     const data = await orderController(body, virtualStockApiClient);
@@ -71,9 +75,13 @@ const orderController = async (
   client: Axios
 ): Promise<OrderControllerResponse> => {
   const updateActions: Array<UpdateAction> = [];
+  //LOGGER
+  logger.info('Before mapChannel');
   const supplierRestID = await mapChannel(
     Object.keys(body.order.lineItems[0].variant.availability.channels)[0]
   );
+  //LOGGER
+  logger.info('After mapChannel', supplierRestID);
   const order = mapOrder(body, supplierRestID);
 
   //LOGGER

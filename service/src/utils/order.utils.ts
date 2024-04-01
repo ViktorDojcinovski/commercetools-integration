@@ -13,7 +13,7 @@ const mapOrder = (body: RequestBody, supplierRestID: string) => {
     customerEmail,
     lineItems,
     store,
-  } = body.order;
+  } = body.resource.obj;
 
   return {
     supplier: supplierRestID,

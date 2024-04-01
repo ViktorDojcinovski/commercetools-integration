@@ -209,10 +209,10 @@ export type OrderControllerResponse = {
 
 export type Resource = {
   typeId: string;
-  order: Order;
+  obj: Order;
 };
 
 export type RequestBody = {
   resource: Resource;
-  order: Order;
+  action: string;
 };

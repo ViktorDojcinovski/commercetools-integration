@@ -35,9 +35,9 @@ const post = async (request: Request, response: Response) => {
     throw new CustomError(400, `Bad request. Allowed value is 'order'.`);
   }
   //LOGGER
-  logger.info('Order received: ', JSON.stringify(body));
-  logger.info('virtualStockApi_v4: ', virtualStockApi_v4);
-  logger.info('process.env.AUTH_TOKEN: ', process.env.AUTH_TOKEN);
+  logger.info(JSON.stringify(body));
+  logger.info(virtualStockApi_v4);
+  logger.info(process.env.AUTH_TOKEN);
 
   const virtualStockApiClient = axiosClient({
     baseURL: virtualStockApi_v4,
@@ -80,20 +80,17 @@ const orderController = async (
   const updateActions: Array<UpdateAction> = [];
   //LOGGER
   logger.info('Before mapChannel');
-  logger.info(JSON.stringify(body.order));
-  logger.info(body.order.lineItems[0]);
-  logger.info(body.order.lineItems[0].variant);
-  logger.info(body.order.lineItems[0].variant.availability);
-  logger.info(body.order.lineItems[0].variant.availability.channels);
   const supplierRestID = await mapChannel(
-    Object.keys(body.order.lineItems[0].variant.availability.channels)[0]
+    Object.keys(body.resource.obj.lineItems[0].variant.availability.channels)[0]
   );
   //LOGGER
-  logger.info('After mapChannel', supplierRestID);
+  logger.info('After mapChannel supplierRestID');
+  logger.info(supplierRestID);
   const order = mapOrder(body, supplierRestID);
 
   //LOGGER
-  logger.info('Order mapped: ', JSON.stringify(order));
+  logger.info('Order mapped: ');
+  logger.info(JSON.stringify(order));
 
   try {
     await client.post('/orders/?format=json', order);

@@ -1,8 +1,6 @@
 import { Request, Response } from 'express';
 import { Axios } from 'axios';
-import { UpdateAction } from '@commercetools/sdk-client-v2';
 
-import { apiSuccess } from '../api/success.api';
 import CustomError from '../errors/custom.error';
 import axiosClient from '../api/axios-client.api';
 import { OrderControllerResponse, RequestBody } from '../types/order.types';
@@ -44,7 +42,7 @@ const post = async (request: Request, response: Response) => {
     const data = await orderController(body, virtualStockApiClient);
 
     if (data && data.statusCode === 200) {
-      apiSuccess(data.statusCode, data.actions, response);
+      response.status(data.statusCode);
       return;
     }
   } catch (error: any) {
@@ -68,7 +66,6 @@ const orderController = async (
   body: RequestBody,
   client: Axios
 ): Promise<OrderControllerResponse> => {
-  const updateActions: Array<UpdateAction> = [];
   const supplierRestID = await mapChannel(
     Object.keys(body.resource.obj.lineItems[0].variant.availability.channels)[0]
   );
@@ -114,15 +111,15 @@ const orderController = async (
       );
     }
   }
-  const updateAction: UpdateAction = {
-    action: 'Create',
-    updateProductData: false,
-  };
-  updateActions.push(updateAction);
+  // const updateAction: UpdateAction = {
+  //   action: 'Create',
+  //   updateProductData: false,
+  // };
+  // updateActions.push(updateAction);
 
   const data = {
     statusCode: 200,
-    actions: updateActions,
+    // actions: updateActions,
   };
 
   return data;

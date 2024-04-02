@@ -204,7 +204,7 @@ export type Order = {
 
 export type OrderControllerResponse = {
   statusCode: number;
-  actions: UpdateAction[];
+  actions?: UpdateAction[];
 };
 
 export type Resource = {

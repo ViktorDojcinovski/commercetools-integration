@@ -12,6 +12,8 @@ serviceRouter.post(
     try {
       await post(req, res);
       logger.info('Order processed successfully.');
+
+      return res.send();
     } catch (error) {
       next(error as CustomError);
     }

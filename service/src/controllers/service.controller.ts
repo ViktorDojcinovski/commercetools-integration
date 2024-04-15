@@ -94,11 +94,32 @@ const orderController = async (
 
             break;
           } catch (error: any) {
-            throw new CustomError(
-              error.response.status,
-              'Failed to refresh token or to process the order. Please try again later.',
-              error.response.data.error
-            );
+            try {
+              const response = await client.post('/token', {
+                username: process.env.CTP_VS_USERNAME ?? '',
+                password: process.env.CTP_VS_PASSWORD ?? '',
+              });
+
+              process.env.AUTH_TOKEN = response.data.access;
+              process.env.REFRESH_TOKEN = response.data.refresh;
+
+              const virtualStockApiClient = axiosClient({
+                baseURL: virtualStockApi_v4,
+                headers: {
+                  'Content-Type': 'application/json',
+                  Authorization: `Bearer ${process.env.AUTH_TOKEN}`,
+                },
+              });
+
+              await virtualStockApiClient.post('/orders/?format=json', order);
+              break;
+            } catch (error: any) {
+              throw new CustomError(
+                error.response.status,
+                'Failed to refresh token or to process the order. Please try again later.',
+                error.response.data.error
+              );
+            }
           }
         }
         default:

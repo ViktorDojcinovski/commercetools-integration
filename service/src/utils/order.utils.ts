@@ -21,6 +21,7 @@ const mapOrder = (body: RequestBody, supplierRestID: string) => {
     additional_order_reference: body.resource.typeId,
     end_user_purchase_order_reference: createdBy.user.id,
     shipping_store_number: store.key,
+    test_flag: false,
     items: lineItems.map((item: LineItem) => {
       return {
         currency_code: shippingInfo.price.currencyCode,

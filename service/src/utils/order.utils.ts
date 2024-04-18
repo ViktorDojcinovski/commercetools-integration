@@ -14,7 +14,7 @@ const mapOrder = (body: RequestBody, supplierRestID: string) => {
     lineItems,
     store,
   } = body.resource.obj;
-
+  logger.info('before body.resource.obj');
   logger.info(JSON.stringify(body.resource.obj));
 
   return {

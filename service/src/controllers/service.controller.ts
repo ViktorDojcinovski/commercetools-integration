@@ -21,7 +21,7 @@ import { logger } from '../utils/logger.utils';
 const post = async (request: Request, response: Response) => {
   const { body } = request;
   const { resource } = body;
-
+  logger.info('before resource');
   logger.info(JSON.stringify(resource));
 
   if (!resource) {

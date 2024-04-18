@@ -22,6 +22,8 @@ const post = async (request: Request, response: Response) => {
   const { body } = request;
   const { resource } = body;
 
+  logger.info(JSON.stringify(resource));
+
   if (!resource) {
     throw new CustomError(400, 'Bad request. Missing body resource parameter.');
   }

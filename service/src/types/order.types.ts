@@ -61,6 +61,7 @@ type Address = {
   city: string;
   state: string;
   country: string;
+  mobile: string;
 };
 
 export type LineItem = {
@@ -204,6 +205,7 @@ export type Order = {
 
 export type OrderControllerResponse = {
   statusCode: number;
+  message?: string;
   actions?: UpdateAction[];
 };
 

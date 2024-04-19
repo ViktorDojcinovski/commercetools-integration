@@ -21,8 +21,6 @@ import { logger } from '../utils/logger.utils';
 const post = async (request: Request, response: Response) => {
   const { body } = request;
   const { resource } = body;
-  logger.info('before resource');
-  logger.info(JSON.stringify(resource));
 
   if (!resource) {
     throw new CustomError(400, 'Bad request. Missing body resource parameter.');
@@ -46,6 +44,9 @@ const post = async (request: Request, response: Response) => {
     if (data && data.statusCode === 200) {
       response.status(data.statusCode);
       return;
+    } else if (data && data.statusCode === 400 && data.message) {
+      response.status(data.statusCode);
+      return response.send(data.message);
     }
   } catch (error: any) {
     if (error instanceof Error) {
@@ -68,6 +69,12 @@ const orderController = async (
   body: RequestBody,
   client: Axios
 ): Promise<OrderControllerResponse> => {
+  if (!body.resource.obj.lineItems[0].variant.availability.channels) {
+    return {
+      statusCode: 400,
+      message: 'A product must have an inventory!',
+    };
+  }
   const supplierRestID = await mapChannel(
     Object.keys(body.resource.obj.lineItems[0].variant.availability.channels)[0]
   );
@@ -140,12 +147,9 @@ const orderController = async (
   // };
   // updateActions.push(updateAction);
 
-  const data = {
+  return {
     statusCode: 200,
-    // actions: updateActions,
   };
-
-  return data;
 };
 
 export { post, orderController };

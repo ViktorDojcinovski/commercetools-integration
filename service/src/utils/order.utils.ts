@@ -1,7 +1,6 @@
 import { createApiRoot } from '../client/create.client';
 import { edgeApi_v4 } from '../consts/virtualstock.const';
 import { LineItem, RequestBody } from '../types/order.types';
-import { logger } from '../utils/logger.utils';
 
 const mapOrder = (body: RequestBody, supplierRestID: string) => {
   const {
@@ -14,8 +13,6 @@ const mapOrder = (body: RequestBody, supplierRestID: string) => {
     lineItems,
     store,
   } = body.resource.obj;
-  logger.info('before body.resource.obj');
-  logger.info(JSON.stringify(body.resource.obj));
 
   return {
     supplier: supplierRestID,
@@ -49,6 +46,7 @@ const mapOrder = (body: RequestBody, supplierRestID: string) => {
       postal_code: shippingAddress.postalCode,
       email: customerEmail,
       country: shippingAddress.country,
+      phone: shippingAddress.mobile || '',
     },
     promised_date: createdAt,
   };

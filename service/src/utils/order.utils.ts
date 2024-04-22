@@ -1,13 +1,11 @@
 import { createApiRoot } from '../client/create.client';
 import { edgeApi_v4 } from '../consts/virtualstock.const';
-import { LineItem, RequestBody } from '../types/order.types';
-
-import { logger } from '../utils/logger.utils';
+import { LineItem, RequestBody, LocalizedString } from '../types/order.types';
 
 const mapOrder = (
   body: RequestBody,
   supplierRestID: string,
-  extendedProductsDescriptions: string[]
+  extendedProductsDescriptions: LocalizedString[]
 ) => {
   const {
     id,
@@ -20,9 +18,6 @@ const mapOrder = (
     store,
   } = body.resource.obj;
 
-  logger.info('before extendedProductDescription');
-  logger.info(JSON.stringify(extendedProductsDescriptions));
-
   return {
     supplier: supplierRestID,
     order_reference: id,
@@ -31,12 +26,13 @@ const mapOrder = (
     end_user_purchase_order_reference: createdBy.user.id,
     shipping_store_number: store.key,
     test_flag: false,
-    items: lineItems.map((item: LineItem) => {
+    items: lineItems.map((item: LineItem, i) => {
       return {
         currency_code: shippingInfo.price.currencyCode,
         retailer_sku_reference: item.variant.sku,
         line_reference: item.productId,
         name: item.name['en-GB'],
+        description: extendedProductsDescriptions[i]['en-GB'],
         quantity: item.quantity,
         unit_cost_price: (item.totalPrice.centAmount / 100).toFixed(2),
         subtotal: ((item.totalPrice.centAmount / 100) * item.quantity).toFixed(

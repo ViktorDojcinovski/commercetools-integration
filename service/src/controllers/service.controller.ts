@@ -3,7 +3,11 @@ import { Axios } from 'axios';
 
 import CustomError from '../errors/custom.error';
 import axiosClient from '../api/axios-client.api';
-import { OrderControllerResponse, RequestBody } from '../types/order.types';
+import {
+  LocalizedString,
+  OrderControllerResponse,
+  RequestBody,
+} from '../types/order.types';
 import { virtualStockApi_v4 } from '../consts/virtualstock.const';
 import {
   mapOrder,
@@ -91,7 +95,7 @@ const orderController = async (
   const order = mapOrder(
     body,
     supplierRestID,
-    extendedProductsDescriptions as any
+    extendedProductsDescriptions as LocalizedString[]
   );
 
   try {

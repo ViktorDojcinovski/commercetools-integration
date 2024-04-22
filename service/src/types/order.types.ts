@@ -64,11 +64,16 @@ type Address = {
   mobile: string;
 };
 
+export type LocalizedString = {
+  'en-GB': string;
+};
+
 export type LineItem = {
   id: string;
   productId: string;
   productKey: string;
   name: Record<string, string>;
+  description: string;
   productType: {
     typeId: string;
     id: string;

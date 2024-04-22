@@ -5,7 +5,11 @@ import CustomError from '../errors/custom.error';
 import axiosClient from '../api/axios-client.api';
 import { OrderControllerResponse, RequestBody } from '../types/order.types';
 import { virtualStockApi_v4 } from '../consts/virtualstock.const';
-import { mapOrder, mapChannel } from '../utils/order.utils';
+import {
+  mapOrder,
+  mapChannel,
+  getExtendedProducts,
+} from '../utils/order.utils';
 import { refreshToken } from '../utils/refreshToken.utils';
 import { logger } from '../utils/logger.utils';
 
@@ -69,16 +73,26 @@ const orderController = async (
   body: RequestBody,
   client: Axios
 ): Promise<OrderControllerResponse> => {
-  if (!body.resource.obj.lineItems[0].variant.availability.channels) {
+  const { lineItems } = body.resource.obj;
+
+  if (!lineItems[0].variant.availability.channels) {
     return {
       statusCode: 400,
       message: 'A product must have an inventory!',
     };
   }
   const supplierRestID = await mapChannel(
-    Object.keys(body.resource.obj.lineItems[0].variant.availability.channels)[0]
+    Object.keys(lineItems[0].variant.availability.channels)[0]
   );
-  const order = mapOrder(body, supplierRestID);
+  const extendedProducts = await getExtendedProducts(lineItems);
+  const extendedProductsDescriptions = extendedProducts.map((product) => {
+    return product.masterData.current.description ?? '';
+  });
+  const order = mapOrder(
+    body,
+    supplierRestID,
+    extendedProductsDescriptions as any
+  );
 
   try {
     await client.post('/orders/?format=json', order);

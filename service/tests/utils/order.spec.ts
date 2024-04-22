@@ -66,6 +66,7 @@ describe('mapOrder util function', () => {
           tax: (item.taxedPrice.totalNet.centAmount / 100).toFixed(2),
           tax_rate: item.taxRate.amount * 100,
           total: (item.taxedPrice.totalGross.centAmount / 100).toFixed(2),
+          promised_date: order.createdAt,
         };
       }),
       shipping_address: {
@@ -77,7 +78,6 @@ describe('mapOrder util function', () => {
         email: order.customerEmail,
         country: order.shippingAddress.country,
       },
-      promised_date: order.createdAt,
     });
   });
 });

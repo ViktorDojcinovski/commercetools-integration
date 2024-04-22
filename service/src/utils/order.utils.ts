@@ -2,7 +2,13 @@ import { createApiRoot } from '../client/create.client';
 import { edgeApi_v4 } from '../consts/virtualstock.const';
 import { LineItem, RequestBody } from '../types/order.types';
 
-const mapOrder = (body: RequestBody, supplierRestID: string) => {
+import { logger } from '../utils/logger.utils';
+
+const mapOrder = (
+  body: RequestBody,
+  supplierRestID: string,
+  extendedProductsDescriptions: string[]
+) => {
   const {
     id,
     createdBy,
@@ -13,6 +19,9 @@ const mapOrder = (body: RequestBody, supplierRestID: string) => {
     lineItems,
     store,
   } = body.resource.obj;
+
+  logger.info('before extendedProductDescription');
+  logger.info(extendedProductsDescriptions);
 
   return {
     supplier: supplierRestID,
@@ -36,6 +45,7 @@ const mapOrder = (body: RequestBody, supplierRestID: string) => {
         tax: (item.taxedPrice.totalNet.centAmount / 100).toFixed(2),
         tax_rate: item.taxRate.amount * 100,
         total: (item.taxedPrice.totalGross.centAmount / 100).toFixed(2),
+        promised_date: createdAt,
       };
     }),
     shipping_address: {
@@ -48,7 +58,6 @@ const mapOrder = (body: RequestBody, supplierRestID: string) => {
       country: shippingAddress.country,
       phone: shippingAddress.mobile || '',
     },
-    promised_date: createdAt,
   };
 };
 
@@ -62,4 +71,21 @@ const mapChannel = async (channelId: string) => {
   return `${edgeApi_v4}/suppliers/${channel.body.key}/`;
 };
 
-export { mapOrder, mapChannel };
+const getExtendedProducts = async (lineItems: LineItem[]) => {
+  const extendedProductsPromises = lineItems.map((lineItem) => {
+    return createApiRoot()
+      .products()
+      .withId({ ID: lineItem.productId })
+      .get()
+      .execute();
+  });
+
+  const extendedProducts = await Promise.all(extendedProductsPromises);
+  const extendedProductsData = extendedProducts.map(
+    (exProduct) => exProduct.body
+  );
+
+  return extendedProductsData;
+};
+
+export { mapOrder, mapChannel, getExtendedProducts };

@@ -32,7 +32,7 @@ const mapOrder = (
         retailer_sku_reference: item.variant.sku,
         line_reference: item.productId,
         name: item.name['en-GB'],
-        description: extendedProductsDescriptions[i]['en-GB'],
+        description: extendedProductsDescriptions[i]['en-GB'].substring(0, 255),
         quantity: item.quantity,
         unit_cost_price: (item.totalPrice.centAmount / 100).toFixed(2),
         subtotal: ((item.totalPrice.centAmount / 100) * item.quantity).toFixed(

@@ -21,7 +21,7 @@ const mapOrder = (
   } = body.resource.obj;
 
   logger.info('before extendedProductDescription');
-  logger.info(extendedProductsDescriptions);
+  logger.info(JSON.stringify(extendedProductsDescriptions));
 
   return {
     supplier: supplierRestID,

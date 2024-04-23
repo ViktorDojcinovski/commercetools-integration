@@ -5,58 +5,40 @@ import { order } from '../../src/stubs/order.stub';
 import { mapOrder } from '../../src/utils/order.utils';
 
 jest.mock('axios');
-
-jest.mock('../../src/client/create.client', () => ({
-  createApiRoot: () => {
-    return {
-      channels: () => {
-        return {
-          withId: () => ({
-            get: () => {
-              return {
-                execute: () => {
-                  return {
-                    body: {
-                      id: 'channelId',
-                      key: 'channelKey',
-                    },
-                  };
-                },
-              };
-            },
-          }),
-        };
-      },
-    };
-  },
-}));
+jest.mock('../../src/client/create.client', () => {
+  return jest.requireActual('../../src/__mocks__/createApiRoot');
+});
 
 describe('mapOrder util function', () => {
   const body = {
     resource: {
       typeId: 'order',
+      obj: order,
     } as unknown as Resource,
-    order,
   } as unknown as RequestBody;
   test('should return mapped order object', () => {
     expect(
       mapOrder(
         body as unknown as RequestBody,
-        `https://www.sandbox.the-edge.io/restapi/v4/suppliers/1569/`
+        `https://www.sandbox.the-edge.io/restapi/v4/suppliers/1569/`,
+        // add a Localised string here as a third arg
+        [{ 'en-GB': 'test description' }]
       )
     ).toEqual({
       supplier: `https://www.sandbox.the-edge.io/restapi/v4/suppliers/1569/`,
-      order_reference: body.order.id,
+      order_reference: body.resource.obj.id,
       order_date: order.createdAt,
       additional_order_reference: body.resource.typeId,
-      end_user_purchase_order_reference: body.order.createdBy.user.id,
-      shipping_store_number: body.order.store.key,
+      end_user_purchase_order_reference: body.resource.obj.createdBy.user.id,
+      shipping_store_number: body.resource.obj.store.key,
+      test_flag: false,
       items: order.lineItems.map((item) => {
         return {
-          currency_code: body.order.shippingInfo.price.currencyCode,
+          currency_code: body.resource.obj.shippingInfo.price.currencyCode,
           retailer_sku_reference: item.variant.sku,
           line_reference: item.productId,
           name: item.name['en-GB'],
+          description: 'test description',
           quantity: item.quantity,
           unit_cost_price: (item.totalPrice.centAmount / 100).toFixed(2),
           subtotal: (
@@ -77,6 +59,7 @@ describe('mapOrder util function', () => {
         postal_code: order.shippingAddress.postalCode,
         email: order.customerEmail,
         country: order.shippingAddress.country,
+        phone: '',
       },
     });
   });

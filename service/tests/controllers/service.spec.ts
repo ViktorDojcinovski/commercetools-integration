@@ -9,32 +9,9 @@ import { RequestBody, Resource } from '../../src/types/order.types';
 import { refreshToken } from '../../src/utils/refreshToken.utils';
 
 jest.mock('axios');
-
-jest.mock('../../src/client/create.client', () => ({
-  createApiRoot: () => {
-    return {
-      channels: () => {
-        return {
-          withId: () => ({
-            get: () => {
-              return {
-                execute: () => {
-                  return {
-                    body: {
-                      id: 'channelId',
-                      key: 'channelKey',
-                    },
-                  };
-                },
-              };
-            },
-          }),
-        };
-      },
-    };
-  },
-}));
-
+jest.mock('../../src/client/create.client', () => {
+  return jest.requireActual('../../src/__mocks__/createApiRoot');
+});
 jest.mock('../../src/utils/refreshToken.utils');
 
 describe('Service', () => {
@@ -95,11 +72,38 @@ describe('Service', () => {
       .send({
         resource: {
           typeId: 'order',
+          obj: order,
         },
-        order,
       });
 
     expect(response.status).toEqual(200);
+  });
+
+  test('returns a 400 error response if the order controller fails with 400 error', async () => {
+    jest.doMock('../../src/api/axios-client.api', () => ({
+      __esModule: true,
+      default: () => ({
+        post: jest.fn<() => Promise<any>>().mockResolvedValue({ data: {} }),
+      }),
+    }));
+    jest.resetModules();
+
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { app } = require('../../src/app');
+
+    const response = await request(app)
+      .post('/service')
+      .send({
+        resource: {
+          typeId: 'order',
+          obj: {
+            ...order,
+            lineItems: [{ variant: { availability: {} } }],
+          },
+        },
+      });
+
+    expect(response.status).toEqual(400);
   });
 });
 
@@ -108,30 +112,43 @@ describe('orderController', () => {
     const body = {
       resource: {
         typeId: 'order',
+        obj: order,
       } as unknown as Resource,
       typeId: 'order',
-      order,
     } as unknown as RequestBody;
     const mockResponse = { data: {} };
     (Axios as jest.Mocked<typeof Axios>).post.mockResolvedValue(mockResponse);
     const result = await orderController(body, Axios);
     expect(result).toEqual({
       statusCode: 200,
-      actions: [
-        {
-          action: 'dispatchOrderToVirtualStock',
-          updateProductData: false,
+    });
+  });
+  test('should return data with statusCode 400', async () => {
+    const body = {
+      resource: {
+        typeId: 'order',
+        obj: {
+          ...order,
+          lineItems: [{ variant: { availability: {} } }],
         },
-      ],
+      } as unknown as Resource,
+      typeId: 'order',
+    } as unknown as RequestBody;
+    const mockResponse = { data: {} };
+    (Axios as jest.Mocked<typeof Axios>).post.mockResolvedValue(mockResponse);
+    const result = await orderController(body, Axios);
+    expect(result).toEqual({
+      statusCode: 400,
+      message: 'A product must have an inventory!',
     });
   });
   test('should throw CustomError on failure', async () => {
     const body = {
       resource: {
         typeId: 'order',
+        obj: order,
       } as unknown as Resource,
       typeId: 'order',
-      order,
     } as unknown as RequestBody;
     const error = {
       response: {
@@ -150,9 +167,9 @@ describe('orderController', () => {
     const body = {
       resource: {
         typeId: 'order',
+        obj: order,
       } as unknown as Resource,
       typeId: 'order',
-      order,
     } as unknown as RequestBody;
     const error401 = {
       response: {
@@ -176,9 +193,9 @@ describe('orderController', () => {
     const body = {
       resource: {
         typeId: 'order',
+        obj: order,
       } as unknown as Resource,
       typeId: 'order',
-      order,
     } as unknown as RequestBody;
     const error401 = {
       response: {
@@ -210,9 +227,9 @@ describe('orderController', () => {
     const body = {
       resource: {
         typeId: 'order',
+        obj: order,
       } as unknown as Resource,
       typeId: 'order',
-      order,
     } as unknown as RequestBody;
     const error = {
       response: {
@@ -231,9 +248,9 @@ describe('orderController', () => {
     const body = {
       resource: {
         typeId: 'order',
+        obj: order,
       } as unknown as Resource,
       typeId: 'order',
-      order,
     } as unknown as RequestBody;
     const error = {
       response: undefined,

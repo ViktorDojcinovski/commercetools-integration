@@ -2,15 +2,15 @@ import { describe, expect, test, jest } from '@jest/globals';
 import Axios from 'axios';
 
 import { order } from '../_stubs/order';
-import { executeOrderProcess, mapOrder } from '../../src/utils/order.utils';
-import { RequestBody, Resource } from '../../src/types/order.types';
-import { refreshToken } from '../../src/utils/refreshToken.utils';
+import { executeOrderProcess, mapOrder } from '../../utils/order.utils';
+import { RequestBody, Resource } from '../../types/order.types';
+import { refreshToken } from '../../utils/refreshToken.utils';
 
 jest.mock('axios');
-jest.mock('../../src/client/create.client', () => {
+jest.mock('../src/client/create.client', () => {
   return jest.requireActual('../../src/__mocks__/createApiRoot');
 });
-jest.mock('../../src/utils/refreshToken.utils');
+jest.mock('../src/utils/refreshToken.utils');
 
 describe('executeOrderProcess util function', () => {
   test('should return data with statusCode 200', async () => {

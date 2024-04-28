@@ -1,6 +1,6 @@
 import { describe, expect, test, jest } from '@jest/globals';
 import Axios from 'axios';
-import { refreshToken } from '../../src/utils/refreshToken.utils';
+import { refreshToken } from '../../utils/refreshToken.utils';
 
 jest.mock('axios');
 const mockedAxios = Axios as jest.Mocked<typeof Axios>;

@@ -5,12 +5,12 @@ import { app } from '../../app';
 import { order } from '../_stubs/order';
 
 jest.mock('axios');
-jest.mock('../../src/client/create.client', () => {
-  return jest.requireActual('../../src/__mocks__/createApiRoot');
+jest.mock('../../client/create.client', () => {
+  return jest.requireActual('../../__mocks__/createApiRoot');
 });
-jest.mock('../../src/utils/refreshToken.utils');
+jest.mock('../../utils/refreshToken.utils');
 
-jest.mock('../../src/utils/config.utils', () => ({
+jest.mock('../../utils/config.utils', () => ({
   readConfiguration: jest.fn().mockReturnValue({
     clientId: 'mockClientId',
     clientSecret: 'mockClientSecret',

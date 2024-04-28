@@ -1,7 +1,7 @@
 import { describe, expect, test, jest } from '@jest/globals';
 import request from 'supertest';
 
-import { app } from '../../src/app';
+import { app } from '../../app';
 import { order } from '../_stubs/order';
 
 jest.mock('axios');

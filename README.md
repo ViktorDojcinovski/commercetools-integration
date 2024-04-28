@@ -8,7 +8,7 @@ Please adhere to the recommendations from the Architecture principles for buildi
 
 ## Instructions
 
-Use `create-connect-app` cli with `starter-typescript` as `template` value to download this template repository to build the integration application , folder structure needs to be followed to ensure certification & deployment from commercetools connect team as stated [here](https://github.com/commercetools/connect-application-kit#readme)
+Use `create-connect-app` cli with `starter-typescript` as `template` value to download this template repository to build the integration application, folder structure needs to be followed to ensure certification & deployment from commercetools connect team as stated [here](https://github.com/commercetools/connect-application-kit#readme)
 
 ## Architecture principles for building an connect application
 

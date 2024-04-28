@@ -1,7 +1,7 @@
 deployAs:
-  - name: service
-    applicationType: service
-    endpoint: /service
+  - name: Virtualstock Integration
+    applicationType: event
+    endpoint: /event
     scripts:
       postDeploy: npm install && npm run build && npm run connector:post-deploy
       preUndeploy: npm install && npm run build && npm run connector:pre-undeploy
@@ -11,6 +11,14 @@ deployAs:
           description: commercetools Composable Commerce API region
           required: true
           default: "europe-west1.gcp"
+        - key: CTP_VIRTUALSTOCK_API_V4
+          description: Virtualstock Api v4 url
+          required: true
+          default: "https://api.sandbox.virtualstock.com/restapi/v4"
+        - key: CTP_EDGE_API_V4
+          description: Edge platform Api v4 url
+          required: true
+          default: "https://www.sandbox.the-edge.io/restapi/v4"
       securedConfiguration:
         - key: CTP_PROJECT_KEY
           description: commercetools Composable Commerce project key
@@ -25,66 +33,6 @@ deployAs:
           description: commercetools Composable Commerce client scope
           required: true
         - key: CTP_VS_USERNAME
-          description: VirtualStock Api username
+          description: Virtualstock Api username
         - key: CTP_VS_PASSWORD
-          description: VirtualStock Api password
-  # - name: job
-  #   applicationType: job
-  #   endpoint: /job
-  #   properties:
-  #     schedule: "*/5 * * * *"
-  #   configuration:
-  #     standardConfiguration:
-  #       - key: CTP_REGION
-  #         description: commercetools Composable Commerce API region
-  #         required: true
-  #         default: "europe-west1.gcp"
-  #     securedConfiguration:
-  #       - key: CTP_PROJECT_KEY
-  #         description: commercetools Composable Commerce project key
-  #         required: true
-  #       - key: CTP_CLIENT_ID
-  #         description: commercetools Composable Commerce client ID
-  #         required: true
-  #       - key: CTP_CLIENT_SECRET
-  #         description: commercetools Composable Commerce client secret
-  #         required: true
-  #       - key: CTP_SCOPE
-  #         description: commercetools Composable Commerce client scope
-  #         required: true
-  # - name: event
-  #   applicationType: event
-  #   endpoint: /event
-  #   scripts:
-  #     postDeploy: npm install && npm run build && npm run connector:post-deploy
-  #     preUndeploy: npm install && npm run build && npm run connector:pre-undeploy
-  #   configuration:
-  #     standardConfiguration:
-  #       - key: CTP_REGION
-  #         description: commercetools Composable Commerce API region
-  #         required: true
-  #         default: "europe-west1.gcp"
-  #     securedConfiguration:
-  #       - key: CTP_PROJECT_KEY
-  #         description: commercetools Composable Commerce project key
-  #         required: true
-  #       - key: CTP_CLIENT_ID
-  #         description: commercetools Composable Commerce client ID
-  #         required: true
-  #       - key: CTP_CLIENT_SECRET
-  #         description: commercetools Composable Commerce client secret
-  #         required: true
-  #       - key: CTP_SCOPE
-  #         description: commercetools Composable Commerce client scope
-  #         required: true
-  # - name: merchant-center-custom-application
-  #   applicationType: merchant-center-custom-application
-  #   endpoint: /
-  #   configuration:
-  #     standardConfiguration:
-  #       - key: APPLICATION_ID
-  #         description: The Custom Application ID is provided when you add a Custom Application in the Merchant Center
-  #         required: true
-  #       - key: CLOUD_IDENTIFIER
-  #         description: The identifier of the cloud Region that the Custom Application uses to connect to Composable Commerce. The values map to the actual Merchant Center API URL for that Region
-  #         required: true
+          description: Virtualstock Api password

@@ -3,25 +3,33 @@ dotenv.config();
 import { app } from './app';
 import { logger } from './utils/logger.utils';
 import axiosClient from './api/axios-client.api';
+import { readConfiguration } from './utils/config.utils';
 
 const PORT = process.env.PORT || 8080;
 
 const start = async () => {
-  if (!process.env.CTP_VS_USERNAME || !process.env.CTP_VS_PASSWORD) {
+  const { vsApi_v4, vsUsername, vsPassword } = readConfiguration();
+
+  if (!vsUsername || !vsPassword) {
     logger.error('Missing environment variables');
     process.exit(1);
   }
+  logger.info('inside index file');
+  logger.info(vsApi_v4);
   const virtualStockClient = axiosClient({
-    baseURL: process.env.VIRTUALSTOCK_API_V4 as string,
+    baseURL: vsApi_v4 as string,
     headers: {
       'Content-Type': 'application/json',
     },
   });
 
   if (!process.env.AUTH_TOKEN || !process.env.REFRESH_TOKEN) {
+    logger.info(vsUsername);
+    logger.info(vsPassword);
+
     const response = await virtualStockClient.post('/token', {
-      username: process.env.CTP_VS_USERNAME ?? '',
-      password: process.env.CTP_VS_PASSWORD ?? '',
+      username: vsUsername ?? '',
+      password: vsPassword ?? '',
     });
 
     if (response.status !== 200) {

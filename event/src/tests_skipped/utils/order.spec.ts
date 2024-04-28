@@ -3,7 +3,7 @@ import Axios from 'axios';
 
 import { order } from '../_stubs/order';
 import { executeOrderProcess, mapOrder } from '../../utils/order.utils';
-import { RequestBody, Resource } from '../../types/order.types';
+import { RequestBody, Message } from '../../types/order.types';
 import { refreshToken } from '../../utils/refreshToken.utils';
 
 jest.mock('axios');
@@ -12,15 +12,16 @@ jest.mock('../src/client/create.client', () => {
 });
 jest.mock('../src/utils/refreshToken.utils');
 
+const body = {
+  message: {
+    typeId: 'order',
+    obj: order,
+  } as unknown as Message,
+  typeId: 'order',
+} as unknown as RequestBody;
+
 describe('executeOrderProcess util function', () => {
   test('should return data with statusCode 200', async () => {
-    const body = {
-      resource: {
-        typeId: 'order',
-        obj: order,
-      } as unknown as Resource,
-      typeId: 'order',
-    } as unknown as RequestBody;
     const mockResponse = { data: {} };
     (Axios as jest.Mocked<typeof Axios>).post.mockResolvedValue(mockResponse);
     const result = await executeOrderProcess(body, Axios);
@@ -30,13 +31,13 @@ describe('executeOrderProcess util function', () => {
   });
   test('should return data with statusCode 400', async () => {
     const body = {
-      resource: {
+      message: {
         typeId: 'order',
         obj: {
           ...order,
           lineItems: [{ variant: { availability: {} } }],
         },
-      } as unknown as Resource,
+      } as unknown as Message,
       typeId: 'order',
     } as unknown as RequestBody;
     const mockResponse = { data: {} };
@@ -48,13 +49,6 @@ describe('executeOrderProcess util function', () => {
     });
   });
   test('should throw CustomError on failure', async () => {
-    const body = {
-      resource: {
-        typeId: 'order',
-        obj: order,
-      } as unknown as Resource,
-      typeId: 'order',
-    } as unknown as RequestBody;
     const error = {
       response: {
         status: 500,
@@ -69,13 +63,6 @@ describe('executeOrderProcess util function', () => {
     );
   });
   test('should refresh token and post order successfully', async () => {
-    const body = {
-      resource: {
-        typeId: 'order',
-        obj: order,
-      } as unknown as Resource,
-      typeId: 'order',
-    } as unknown as RequestBody;
     const error401 = {
       response: {
         status: 401,
@@ -95,13 +82,6 @@ describe('executeOrderProcess util function', () => {
     expect(updatedClient.post).toHaveBeenCalledTimes(1);
   });
   test('should throw CustomError on second failure after 401 status', async () => {
-    const body = {
-      resource: {
-        typeId: 'order',
-        obj: order,
-      } as unknown as Resource,
-      typeId: 'order',
-    } as unknown as RequestBody;
     const error401 = {
       response: {
         status: 401,
@@ -129,13 +109,6 @@ describe('executeOrderProcess util function', () => {
     );
   });
   test('should throw CustomError on default case and else block', async () => {
-    const body = {
-      resource: {
-        typeId: 'order',
-        obj: order,
-      } as unknown as Resource,
-      typeId: 'order',
-    } as unknown as RequestBody;
     const error = {
       response: {
         status: 503,
@@ -150,13 +123,6 @@ describe('executeOrderProcess util function', () => {
     );
   });
   test('should handle error without response', async () => {
-    const body = {
-      resource: {
-        typeId: 'order',
-        obj: order,
-      } as unknown as Resource,
-      typeId: 'order',
-    } as unknown as RequestBody;
     const error = {
       response: undefined,
       message: 'Network error',
@@ -170,10 +136,10 @@ describe('executeOrderProcess util function', () => {
 
 describe('mapOrder util function', () => {
   const body = {
-    resource: {
+    message: {
       typeId: 'order',
       obj: order,
-    } as unknown as Resource,
+    } as unknown as Message,
   } as unknown as RequestBody;
   test('should return mapped order object', () => {
     expect(
@@ -184,15 +150,15 @@ describe('mapOrder util function', () => {
       )
     ).toEqual({
       supplier: `https://www.sandbox.the-edge.io/restapi/v4/suppliers/1569/`,
-      order_reference: body.resource.obj.id,
+      order_reference: body.message.obj.id,
       order_date: order.createdAt,
-      additional_order_reference: body.resource.typeId,
-      end_user_purchase_order_reference: body.resource.obj.createdBy.user.id,
-      shipping_store_number: body.resource.obj.store.key,
+      additional_order_reference: body.message.typeId,
+      end_user_purchase_order_reference: body.message.obj.createdBy.user.id,
+      shipping_store_number: body.message.obj.store.key,
       test_flag: false,
       items: order.lineItems.map((item) => {
         return {
-          currency_code: body.resource.obj.shippingInfo.price.currencyCode,
+          currency_code: body.message.obj.shippingInfo.price.currencyCode,
           retailer_sku_reference: item.variant.sku,
           line_reference: item.productId,
           name: item.name['en-GB'],

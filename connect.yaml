@@ -33,6 +33,8 @@ deployAs:
           description: commercetools Composable Commerce client scope
           required: true
         - key: CTP_VS_USERNAME
+          required: true
           description: Virtualstock Api username
         - key: CTP_VS_PASSWORD
+          required: true
           description: Virtualstock Api password

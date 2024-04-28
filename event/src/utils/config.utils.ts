@@ -18,8 +18,8 @@ export const readConfiguration = () => {
     region: process.env.CTP_REGION as string,
     vsPassword: process.env.CTP_VS_PASSWORD as string,
     vsUsername: process.env.CTP_VS_USERNAME as string,
-    vsApi_v4: process.env.VIRTUALSTOCK_API_V4 as string,
-    edgeApi_v4: process.env.EDGE_API_V4 as string,
+    vsApi_v4: process.env.CTP_VIRTUALSTOCK_API_V4 as string,
+    edgeApi_v4: process.env.CTP_EDGE_API_V4 as string,
   };
 
   const validationErrors = getValidateMessages(envValidators, envVars);

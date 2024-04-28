@@ -1,5 +1,5 @@
 deployAs:
-  - name: Virtualstock Integration
+  - name: virtualstock-integration
     applicationType: event
     endpoint: /event
     scripts:

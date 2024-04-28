@@ -3,7 +3,6 @@ import {
   standardString,
   standardKey,
   region,
-  standardUrl,
 } from './helpers.validators';
 
 /**
@@ -47,8 +46,6 @@ const envValidators = [
     message: 'Not a valid region.',
     referencedBy: 'environmentVariables',
   }),
-  standardUrl(['vsApi_v4'], 'Not a valid url'),
-  standardUrl(['edgeApi_v4'], 'Not a valid url'),
 ];
 
 export default envValidators;

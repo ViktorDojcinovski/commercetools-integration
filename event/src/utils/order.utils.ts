@@ -24,6 +24,8 @@ const executeOrderProcess = async (
   order: Order,
   client: Axios
 ): Promise<OrderControllerResponse> => {
+  logger.info('inside executeOrderProcess');
+  logger.info(order);
   const { lineItems } = order;
 
   if (!lineItems[0].variant.availability.channels) {
@@ -44,6 +46,8 @@ const executeOrderProcess = async (
   );
 
   try {
+    logger.info('mappedOrder');
+    logger.info(mappedOrder);
     await client.post('/orders/?format=json', mappedOrder);
   } catch (error: any) {
     if (error.response) {

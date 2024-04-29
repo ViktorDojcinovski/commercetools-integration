@@ -28,6 +28,8 @@ const processOrder = async (request: Request, response: Response) => {
   }
 
   const { body } = request;
+  logger.info('log body');
+  logger.info(JSON.stringify(body));
   const orderCreatedMessage = body.message;
 
   if (!orderCreatedMessage) {

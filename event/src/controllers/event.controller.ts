@@ -15,7 +15,7 @@ import { logger } from '../utils/logger.utils';
  * @returns
  */
 const processOrder = async (request: Request, response: Response) => {
-  logger.info(JSON.stringify(request));
+  logger.info(request);
 
   // Check request body
   if (!request.body) {

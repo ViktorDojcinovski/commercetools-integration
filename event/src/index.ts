@@ -14,8 +14,6 @@ const start = async () => {
     logger.error('Missing environment variables');
     process.exit(1);
   }
-  logger.info('inside index file');
-  logger.info(vsApi_v4);
   const virtualStockClient = axiosClient({
     baseURL: vsApi_v4 as string,
     headers: {
@@ -24,9 +22,6 @@ const start = async () => {
   });
 
   if (!process.env.AUTH_TOKEN || !process.env.REFRESH_TOKEN) {
-    logger.info(vsUsername);
-    logger.info(vsPassword);
-
     const response = await virtualStockClient.post('/token', {
       username: vsUsername ?? '',
       password: vsPassword ?? '',

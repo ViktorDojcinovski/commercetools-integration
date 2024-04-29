@@ -41,13 +41,13 @@ const executeOrderProcess = async (
   const mappedOrder = mapOrder(
     order,
     supplierRestID,
-    'additionalOrderReference',
+    'aditional_ref002',
     extendedProductsDescriptions as LocalizedString[]
   );
 
   try {
     logger.info('mappedOrder');
-    logger.info(mappedOrder);
+    logger.info(JSON.stringify(mappedOrder));
     await client.post('/orders/?format=json', mappedOrder);
   } catch (error: any) {
     if (error.response) {

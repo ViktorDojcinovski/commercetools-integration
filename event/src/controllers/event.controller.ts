@@ -15,8 +15,6 @@ import { logger } from '../utils/logger.utils';
  * @returns
  */
 const processOrder = async (request: Request, response: Response) => {
-  logger.info(request);
-
   // Check request body
   if (!request.body) {
     logger.error('Missing request body.');

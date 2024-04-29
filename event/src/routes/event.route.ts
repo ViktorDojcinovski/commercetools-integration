@@ -10,6 +10,16 @@ eventRouter.post(
   '/',
   async (req: Request, res: Response, next: NextFunction) => {
     try {
+      if (typeof req === 'object' && req !== null) {
+        logger.info(req);
+      } else {
+        try {
+          JSON.parse(req);
+          logger.info(req);
+        } catch (e) {
+          logger.info(JSON.stringify(req));
+        }
+      }
       logger.info('Order-created message received.');
       await processOrder(req, res);
       logger.info('Order processed successfully.');

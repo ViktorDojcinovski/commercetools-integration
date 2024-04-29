@@ -10,10 +10,11 @@ import {
 } from '../types/order.types';
 import { refreshToken } from '../utils/refreshToken.utils';
 import { logger } from '../utils/logger.utils';
+import { readConfiguration } from './config.utils';
 
 /**
  * Executes the process of network request to
- * client's endpoint
+ * client's endpoint (Virtualstock)
  *
  * @param {RequestBody} body The body of the Request
  * @param {Axios} client The axios client
@@ -151,7 +152,7 @@ const mapChannel = async (channelId: string) => {
     .get()
     .execute();
 
-  return `${process.env.EDGE_API_V4}/suppliers/${channel.body.key}/`;
+  return `${readConfiguration().edgeApi_v4}/suppliers/${channel.body.key}/`;
 };
 
 const getExtendedProducts = async (lineItems: LineItem[]) => {

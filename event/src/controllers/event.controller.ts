@@ -26,6 +26,14 @@ const processOrder = async (request: Request, response: Response) => {
     logger.error('Missing body message');
     throw new CustomError(400, 'Bad request: Wrong No Pub/Sub message format');
   }
+  logger.info(
+    JSON.stringify({
+      method: request.method,
+      url: request.url,
+      headers: request.headers,
+      body: request.body,
+    })
+  );
 
   const { body } = request;
   const orderCreatedMessage = body.message;
@@ -34,8 +42,19 @@ const processOrder = async (request: Request, response: Response) => {
     throw new CustomError(400, 'Bad request. Missing body message parameter.');
   }
 
-  if (orderCreatedMessage.typeId !== 'order') {
-    throw new CustomError(400, `Bad request. Allowed value is 'order'.`);
+  // if (orderCreatedMessage.typeId !== 'order') {
+  //   throw new CustomError(400, `Bad request. Allowed value is 'order'.`);
+  // }
+
+  const decodedData = orderCreatedMessage.data
+    ? Buffer.from(orderCreatedMessage.data, 'base64').toString().trim()
+    : undefined;
+
+  logger.info('decodedData');
+  logger.info(JSON.stringify(decodedData));
+  if (decodedData) {
+    const jsonData = JSON.parse(decodedData);
+    logger.info(JSON.stringify(jsonData));
   }
 
   const virtualStockApiClient = axiosClient({

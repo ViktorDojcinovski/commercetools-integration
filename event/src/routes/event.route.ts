@@ -11,14 +11,6 @@ eventRouter.post(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       logger.info('Order-created message received.');
-      logger.info(
-        JSON.stringify({
-          method: req.method,
-          url: req.url,
-          headers: req.headers,
-          body: req.body,
-        })
-      );
       await processOrder(req, res);
       logger.info('Order processed successfully.');
 

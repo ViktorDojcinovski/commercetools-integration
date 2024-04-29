@@ -3,8 +3,8 @@ import { Axios } from 'axios';
 import CustomError from '../errors/custom.error';
 import { createApiRoot } from '../client/create.client';
 import {
+  Order,
   LineItem,
-  RequestBody,
   LocalizedString,
   OrderControllerResponse,
 } from '../types/order.types';
@@ -16,21 +16,18 @@ import { readConfiguration } from './config.utils';
  * Executes the process of network request to
  * client's endpoint (Virtualstock)
  *
- * @param {RequestBody} body The body of the Request
+ * @param {Order} order The Order object
  * @param {Axios} client The axios client
  * @returns {Promise<OrderControllerResponse>} OrderControllerResponse
  */
 const executeOrderProcess = async (
-  body: RequestBody,
+  order: Order,
   client: Axios
 ): Promise<OrderControllerResponse> => {
-  const { lineItems } = body.message.obj;
+  const { lineItems } = order;
 
   if (!lineItems[0].variant.availability.channels) {
-    return {
-      statusCode: 400,
-      message: 'A product must have an inventory!',
-    };
+    throw new CustomError(400, 'A product must have an inventory!');
   }
   const supplierRestID = await mapChannel(
     Object.keys(lineItems[0].variant.availability.channels)[0]
@@ -39,14 +36,15 @@ const executeOrderProcess = async (
   const extendedProductsDescriptions = extendedProducts.map((product) => {
     return product.masterData.current.description ?? '';
   });
-  const order = mapOrder(
-    body,
+  const mappedOrder = mapOrder(
+    order,
     supplierRestID,
+    'additionalOrderReference',
     extendedProductsDescriptions as LocalizedString[]
   );
 
   try {
-    await client.post('/orders/?format=json', order);
+    await client.post('/orders/?format=json', mappedOrder);
   } catch (error: any) {
     if (error.response) {
       const {
@@ -91,8 +89,9 @@ const executeOrderProcess = async (
 };
 
 const mapOrder = (
-  body: RequestBody,
+  order: Order,
   supplierRestID: string,
+  additionalOrderReference: string,
   extendedProductsDescriptions: LocalizedString[]
 ) => {
   const {
@@ -104,13 +103,13 @@ const mapOrder = (
     customerEmail,
     lineItems,
     store,
-  } = body.message.obj;
+  } = order;
 
   return {
     supplier: supplierRestID,
     order_reference: id,
     order_date: createdAt,
-    additional_order_reference: body.message.typeId,
+    additional_order_reference: additionalOrderReference,
     end_user_purchase_order_reference: createdBy.user.id,
     shipping_store_number: store.key,
     test_flag: false,

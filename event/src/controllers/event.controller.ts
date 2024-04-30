@@ -40,6 +40,13 @@ const processOrder = async (request: Request, response: Response) => {
 
   const { resource, order } = JSON.parse(decodedData);
 
+  logger.info('resource');
+  logger.info(JSON.stringify(resource));
+  logger.info('order');
+  logger.info(JSON.stringify(order));
+
+  return;
+
   if (resource.typeId !== 'order') {
     throw new CustomError(400, `Bad request. Allowed value is 'order'.`);
   }

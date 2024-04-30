@@ -3,50 +3,56 @@ import Axios from 'axios';
 
 import { order } from '../_stubs/order';
 import { executeOrderProcess, mapOrder } from '../../utils/order.utils';
-import { RequestBody, Message } from '../../types/order.types';
+import { Order } from '../../types/order.types';
 import { refreshToken } from '../../utils/refreshToken.utils';
 
 jest.mock('axios');
-jest.mock('../src/client/create.client', () => {
-  return jest.requireActual('../../src/__mocks__/createApiRoot');
+jest.mock('../../client/create.client', () => {
+  return jest.requireActual('../../__mocks__/createApiRoot');
 });
-jest.mock('../src/utils/refreshToken.utils');
-
-const body = {
-  message: {
-    typeId: 'order',
-    obj: order,
-  } as unknown as Message,
-  typeId: 'order',
-} as unknown as RequestBody;
+jest.mock('../../utils/refreshToken.utils');
+jest.mock('../../utils/config.utils', () => ({
+  readConfiguration: jest.fn().mockReturnValue({
+    clientId: 'mockClientId',
+    clientSecret: 'mockClientSecret',
+    projectKey: 'mockProjectKey',
+    scope: 'mockScope',
+    region: 'mockRegion',
+    vsPassword: 'mockVsPassword',
+    vsUsername: 'mockVsUsername',
+    vsApi_v4: 'mockVsApi_v4',
+    edgeApi_v4: 'mockEdgeApi_v4',
+  }),
+}));
 
 describe('executeOrderProcess util function', () => {
   test('should return data with statusCode 200', async () => {
     const mockResponse = { data: {} };
     (Axios as jest.Mocked<typeof Axios>).post.mockResolvedValue(mockResponse);
-    const result = await executeOrderProcess(body, Axios);
+    const result = await executeOrderProcess(order as unknown as Order, Axios);
     expect(result).toEqual({
       statusCode: 200,
     });
   });
   test('should return data with statusCode 400', async () => {
-    const body = {
-      message: {
-        typeId: 'order',
-        obj: {
-          ...order,
-          lineItems: [{ variant: { availability: {} } }],
-        },
-      } as unknown as Message,
-      typeId: 'order',
-    } as unknown as RequestBody;
     const mockResponse = { data: {} };
+    const mockedOrder = {
+      ...order,
+      lineItems: [
+        {
+          ...order.lineItems,
+          variant: {
+            ...order.lineItems[0].variant,
+            availability: {},
+          },
+        },
+      ],
+    };
+
     (Axios as jest.Mocked<typeof Axios>).post.mockResolvedValue(mockResponse);
-    const result = await executeOrderProcess(body, Axios);
-    expect(result).toEqual({
-      statusCode: 400,
-      message: 'A product must have an inventory!',
-    });
+    expect(
+      executeOrderProcess(mockedOrder as unknown as Order, Axios)
+    ).rejects.toThrow('A product must have an inventory!');
   });
   test('should throw CustomError on failure', async () => {
     const error = {
@@ -58,9 +64,9 @@ describe('executeOrderProcess util function', () => {
       },
     };
     (Axios as jest.Mocked<typeof Axios>).post.mockRejectedValue(error);
-    await expect(executeOrderProcess(body, Axios)).rejects.toThrow(
-      'Failed to process the order.'
-    );
+    await expect(
+      executeOrderProcess(order as unknown as Order, Axios)
+    ).rejects.toThrow('Failed to process the order.');
   });
   test('should refresh token and post order successfully', async () => {
     const error401 = {
@@ -78,7 +84,7 @@ describe('executeOrderProcess util function', () => {
     (
       refreshToken as jest.MockedFunction<typeof refreshToken>
     ).mockResolvedValueOnce(updatedClient as any);
-    await executeOrderProcess(body, Axios);
+    await executeOrderProcess(order as unknown as Order, Axios);
     expect(updatedClient.post).toHaveBeenCalledTimes(1);
   });
   test('should throw CustomError on second failure after 401 status', async () => {
@@ -104,9 +110,9 @@ describe('executeOrderProcess util function', () => {
     (
       refreshToken as jest.MockedFunction<typeof refreshToken>
     ).mockResolvedValue(Axios);
-    await expect(executeOrderProcess(body, Axios)).rejects.toThrow(
-      'Failed to refresh the token and to process the order'
-    );
+    await expect(
+      executeOrderProcess(order as unknown as Order, Axios)
+    ).rejects.toThrow('Failed to refresh the token and to process the order');
   });
   test('should throw CustomError on default case and else block', async () => {
     const error = {
@@ -118,9 +124,9 @@ describe('executeOrderProcess util function', () => {
       },
     };
     (Axios as jest.Mocked<typeof Axios>).post.mockRejectedValue(error);
-    await expect(executeOrderProcess(body, Axios)).rejects.toThrow(
-      'Unexpected error.'
-    );
+    await expect(
+      executeOrderProcess(order as unknown as Order, Axios)
+    ).rejects.toThrow('Unexpected error.');
   });
   test('should handle error without response', async () => {
     const error = {
@@ -128,37 +134,32 @@ describe('executeOrderProcess util function', () => {
       message: 'Network error',
     };
     (Axios as jest.Mocked<typeof Axios>).post.mockRejectedValue(error);
-    await expect(executeOrderProcess(body, Axios)).rejects.toThrow(
-      'Internal server error. Please try again later.'
-    );
+    await expect(
+      executeOrderProcess(order as unknown as Order, Axios)
+    ).rejects.toThrow('Internal server error. Please try again later.');
   });
 });
 
 describe('mapOrder util function', () => {
-  const body = {
-    message: {
-      typeId: 'order',
-      obj: order,
-    } as unknown as Message,
-  } as unknown as RequestBody;
   test('should return mapped order object', () => {
     expect(
       mapOrder(
-        body as unknown as RequestBody,
+        order as unknown as Order,
         `https://www.sandbox.the-edge.io/restapi/v4/suppliers/1569/`,
+        'aditional_ref002',
         [{ 'en-GB': 'test description' }]
       )
     ).toEqual({
       supplier: `https://www.sandbox.the-edge.io/restapi/v4/suppliers/1569/`,
-      order_reference: body.message.obj.id,
+      order_reference: order.id,
       order_date: order.createdAt,
-      additional_order_reference: body.message.typeId,
-      end_user_purchase_order_reference: body.message.obj.createdBy.user.id,
-      shipping_store_number: body.message.obj.store.key,
+      additional_order_reference: 'aditional_ref002',
+      end_user_purchase_order_reference: order.createdBy.user.id,
+      shipping_store_number: order.store.key,
       test_flag: false,
       items: order.lineItems.map((item) => {
         return {
-          currency_code: body.message.obj.shippingInfo.price.currencyCode,
+          currency_code: order.shippingInfo.price.currencyCode,
           retailer_sku_reference: item.variant.sku,
           line_reference: item.productId,
           name: item.name['en-GB'],

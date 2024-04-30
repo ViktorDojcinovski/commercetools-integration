@@ -24,8 +24,6 @@ const executeOrderProcess = async (
   order: Order,
   client: Axios
 ): Promise<OrderControllerResponse> => {
-  logger.info('inside executeOrderProcess');
-  logger.info(order);
   const { lineItems } = order;
 
   if (!lineItems[0].variant.availability.channels) {
@@ -46,9 +44,9 @@ const executeOrderProcess = async (
   );
 
   try {
-    logger.info('mappedOrder');
-    logger.info(JSON.stringify(mappedOrder));
-    await client.post('/orders/?format=json', mappedOrder);
+    const res = await client.post('/orders/?format=json', mappedOrder);
+    logger.info('res');
+    logger.info(res);
   } catch (error: any) {
     if (error.response) {
       const {
@@ -57,6 +55,7 @@ const executeOrderProcess = async (
 
       switch (status) {
         case 500:
+          logger.info('500');
           throw new CustomError(
             500,
             'Failed to process the order.',
@@ -77,9 +76,12 @@ const executeOrderProcess = async (
           }
         }
         default:
+          logger.info('default');
+          logger.info(status);
           throw new CustomError(status, error.response.data.error);
       }
     } else {
+      logger.info('else');
       throw new CustomError(
         500,
         'Internal server error. Please try again later.'

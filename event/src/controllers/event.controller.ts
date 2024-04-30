@@ -30,10 +30,6 @@ const processOrder = async (request: Request, response: Response) => {
   const { body } = request;
   const orderCreatedMessage = body.message;
 
-  if (!orderCreatedMessage) {
-    throw new CustomError(400, 'Bad request. Missing body message parameter.');
-  }
-
   const decodedData = orderCreatedMessage.data
     ? Buffer.from(orderCreatedMessage.data, 'base64').toString().trim()
     : undefined;
@@ -44,7 +40,7 @@ const processOrder = async (request: Request, response: Response) => {
 
   const { resource, order } = JSON.parse(decodedData);
 
-  if (!order && !(resource.typeId === 'order')) {
+  if (resource.typeId !== 'order') {
     throw new CustomError(400, `Bad request. Allowed value is 'order'.`);
   }
 
@@ -62,9 +58,6 @@ const processOrder = async (request: Request, response: Response) => {
     if (data && data.statusCode === 200) {
       response.status(data.statusCode);
       return;
-    } else if (data && data.statusCode === 400 && data.message) {
-      response.status(data.statusCode);
-      return response.send(data.message);
     }
   } catch (error: any) {
     if (error instanceof Error) {

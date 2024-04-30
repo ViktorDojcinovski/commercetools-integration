@@ -1,7 +1,7 @@
 import { Router, Request, Response, NextFunction } from 'express';
 
 import { logger } from '../utils/logger.utils';
-import { processOrder } from '../controllers/event.controller';
+// import { processOrder } from '../controllers/event.controller';
 import CustomError from '../errors/custom.error';
 
 const eventRouter = Router();
@@ -11,7 +11,7 @@ eventRouter.post(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       logger.info('Order-created message received.');
-      await processOrder(req, res);
+      // await processOrder(req, res);
       logger.info('Order processed successfully.');
 
       return res.send();

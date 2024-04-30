@@ -26,6 +26,9 @@ const executeOrderProcess = async (
 ): Promise<OrderControllerResponse> => {
   const { lineItems } = order;
 
+  logger.info('lineItems');
+  logger.info(lineItems);
+
   if (!lineItems[0].variant.availability.channels) {
     // throw new CustomError(400, 'A product must have an inventory!');
     return {
@@ -45,6 +48,9 @@ const executeOrderProcess = async (
     'aditional_ref002',
     extendedProductsDescriptions as LocalizedString[]
   );
+
+  logger.info('mappedOrder');
+  logger.info(mappedOrder);
 
   try {
     await client.post('/orders/?format=json', mappedOrder);

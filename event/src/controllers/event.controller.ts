@@ -45,10 +45,9 @@ const processOrder = async (request: Request, response: Response) => {
   logger.info('order');
   logger.info(JSON.stringify(order));
 
-  return;
-
   if (resource.typeId !== 'order') {
-    throw new CustomError(400, `Bad request. Allowed value is 'order'.`);
+    // throw new CustomError(400, `Bad request. Allowed value is 'order'.`);
+    return;
   }
 
   const virtualStockApiClient = axiosClient({

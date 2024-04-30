@@ -1,6 +1,6 @@
 import { Axios } from 'axios';
 
-import CustomError from '../errors/custom.error';
+// import CustomError from '../errors/custom.error';
 import { createApiRoot } from '../client/create.client';
 import {
   Order,
@@ -27,7 +27,10 @@ const executeOrderProcess = async (
   const { lineItems } = order;
 
   if (!lineItems[0].variant.availability.channels) {
-    throw new CustomError(400, 'A product must have an inventory!');
+    // throw new CustomError(400, 'A product must have an inventory!');
+    return {
+      statusCode: 200,
+    };
   }
   const supplierRestID = await mapChannel(
     Object.keys(lineItems[0].variant.availability.channels)[0]
@@ -45,6 +48,7 @@ const executeOrderProcess = async (
 
   try {
     await client.post('/orders/?format=json', mappedOrder);
+    logger.info('res');
   } catch (error: any) {
     if (error.response) {
       const {
@@ -56,11 +60,14 @@ const executeOrderProcess = async (
           logger.info(500);
           logger.info(JSON.stringify(mappedOrder));
           logger.info(JSON.stringify(error.response.data.error));
-          throw new CustomError(
-            500,
-            'Failed to process the order.',
-            error.response.data.error
-          );
+          // throw new CustomError(
+          //   500,
+          //   'Failed to process the order.',
+          //   error.response.data.error
+          // );
+          return {
+            statusCode: 200,
+          };
         case 401: {
           logger.info('...refreshing token');
           try {
@@ -69,24 +76,33 @@ const executeOrderProcess = async (
 
             break;
           } catch (error: any) {
-            throw new CustomError(
-              status,
-              'Failed to refresh the token and to process the order'
-            );
+            // throw new CustomError(
+            //   status,
+            //   'Failed to refresh the token and to process the order'
+            // );
+            return {
+              statusCode: 200,
+            };
           }
         }
         default:
           logger.info('default');
           logger.info(JSON.stringify(error.response.data.error));
-          throw new CustomError(status, error.response.data.error);
+          // throw new CustomError(status, error.response.data.error);
+          return {
+            statusCode: 200,
+          };
       }
     } else {
       logger.info('else');
       logger.info(JSON.stringify(mappedOrder));
-      throw new CustomError(
-        500,
-        'Internal server error. Please try again later.'
-      );
+      // throw new CustomError(
+      //   500,
+      //   'Internal server error. Please try again later.'
+      // );
+      return {
+        statusCode: 200,
+      };
     }
   }
 

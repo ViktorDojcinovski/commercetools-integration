@@ -27,7 +27,7 @@ const executeOrderProcess = async (
   const { lineItems } = order;
 
   logger.info('lineItems');
-  logger.info(lineItems);
+  logger.info(JSON.stringify(lineItems));
 
   if (!lineItems[0].variant.availability.channels) {
     // throw new CustomError(400, 'A product must have an inventory!');
@@ -50,7 +50,7 @@ const executeOrderProcess = async (
   );
 
   logger.info('mappedOrder');
-  logger.info(mappedOrder);
+  logger.info(JSON.stringify(mappedOrder));
 
   try {
     await client.post('/orders/?format=json', mappedOrder);
@@ -78,7 +78,7 @@ const executeOrderProcess = async (
           logger.info('...refreshing token');
           try {
             const updatedClient = await refreshToken(client);
-            await updatedClient.post('/orders/?format=json', order);
+            await updatedClient.post('/orders/?format=json', mappedOrder);
 
             break;
           } catch (error: any) {

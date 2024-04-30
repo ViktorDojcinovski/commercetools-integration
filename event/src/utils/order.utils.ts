@@ -56,6 +56,8 @@ const executeOrderProcess = async (
       switch (status) {
         case 500:
           logger.info('500');
+          logger.info(error.response.data.error);
+          logger.info(mappedOrder);
           throw new CustomError(
             500,
             'Failed to process the order.',

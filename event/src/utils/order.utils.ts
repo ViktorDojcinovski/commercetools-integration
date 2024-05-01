@@ -51,6 +51,7 @@ const executeOrderProcess = async (
 
   logger.info('mappedOrder');
   logger.info(JSON.stringify(mappedOrder));
+  logger.info(JSON.stringify(readConfiguration()));
 
   try {
     await client.post('/orders/?format=json', mappedOrder);
@@ -142,9 +143,9 @@ const mapOrder = (
     end_user_purchase_order_reference: createdBy.user.id,
     shipping_store_number: store.key,
     test_flag: false,
+    currency_code: shippingInfo.price.currencyCode,
     items: lineItems.map((item: LineItem, i) => {
       return {
-        currency_code: shippingInfo.price.currencyCode,
         retailer_sku_reference: item.variant.sku,
         line_reference: item.productId,
         name: item.name['en-GB'],

@@ -9,6 +9,9 @@ const eventRouter = Router();
 eventRouter.post(
   '/',
   async (req: Request, res: Response, next: NextFunction) => {
+    logger.info('req inside post route');
+    logger.info(JSON.stringify(req.headers));
+    logger.info(JSON.stringify(req.body));
     try {
       logger.info('Order-created message received.');
       await processOrder(req, res);

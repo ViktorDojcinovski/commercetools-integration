@@ -52,6 +52,11 @@ const processOrder = async (request: Request, response: Response) => {
     return;
   }
 
+  logger.info('vsApi_v4');
+  logger.info(JSON.stringify(readConfiguration().vsApi_v4));
+  logger.info('process.env.AUTH_TOKEN');
+  logger.info(process.env.AUTH_TOKEN);
+
   const virtualStockApiClient = axiosClient({
     baseURL: readConfiguration().vsApi_v4 as string,
     headers: {
@@ -68,6 +73,7 @@ const processOrder = async (request: Request, response: Response) => {
       return;
     }
   } catch (error: any) {
+    logger.info('inside catch block inside controller');
     if (error instanceof Error) {
       throw new CustomError(
         (error as CustomError).statusCode || 500,

@@ -30,6 +30,7 @@ const executeOrderProcess = async (
   logger.info(JSON.stringify(lineItems));
 
   if (!lineItems[0].variant.availability.channels) {
+    logger.info('inside if-block when no lineItems channel property');
     // throw new CustomError(400, 'A product must have an inventory!');
     return {
       statusCode: 200,
@@ -45,7 +46,7 @@ const executeOrderProcess = async (
   const mappedOrder = mapOrder(
     order,
     supplierRestID,
-    'aditional_ref002',
+    `aditional_ref${(Math.random() * 1000).toFixed()}`,
     extendedProductsDescriptions as LocalizedString[]
   );
 
@@ -85,8 +86,13 @@ const executeOrderProcess = async (
             const updatedClient = await refreshToken(client);
             await updatedClient.post('/orders/?format=json', mappedOrder);
 
-            break;
+            return {
+              statusCode: 200,
+            };
           } catch (error: any) {
+            logger.info('after 401');
+            logger.info(JSON.stringify(mappedOrder));
+            logger.info(JSON.stringify(error.response.data.error));
             // throw new CustomError(
             //   status,
             //   'Failed to refresh the token and to process the order'
@@ -139,6 +145,15 @@ const mapOrder = (
     store,
   } = order;
 
+  logger.info('infamous id');
+  logger.info(id);
+  logger.info('store.key');
+  logger.info(JSON.stringify(store));
+  logger.info('shipingInfo');
+  logger.info(JSON.stringify(shippingInfo));
+  logger.info('shippingAddress');
+  logger.info(JSON.stringify(shippingAddress));
+
   return {
     supplier: supplierRestID,
     order_reference: id,
@@ -179,16 +194,21 @@ const mapOrder = (
 };
 
 const mapChannel = async (channelId: string) => {
+  logger.info('inside mapChannel');
   const channel = await createApiRoot()
     .channels()
     .withId({ ID: channelId })
     .get()
     .execute();
 
+  logger.info('channel');
+  logger.info(JSON.stringify(channel.body));
+
   return `${readConfiguration().edgeApi_v4}/suppliers/${channel.body.key}/`;
 };
 
 const getExtendedProducts = async (lineItems: LineItem[]) => {
+  logger.info('inside getExtendedProducts');
   const extendedProductsPromises = lineItems.map((lineItem) => {
     return createApiRoot()
       .products()
@@ -201,6 +221,8 @@ const getExtendedProducts = async (lineItems: LineItem[]) => {
   const extendedProductsData = extendedProducts.map(
     (exProduct) => exProduct.body
   );
+  logger.info('extendedProductsData');
+  logger.info(JSON.stringify(extendedProductsData));
 
   return extendedProductsData;
 };

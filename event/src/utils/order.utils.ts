@@ -52,11 +52,15 @@ const executeOrderProcess = async (
   logger.info('mappedOrder');
   logger.info(JSON.stringify(mappedOrder));
   logger.info(JSON.stringify(readConfiguration()));
+  logger.info('vsApi_v4');
+  logger.info(JSON.stringify(readConfiguration().vsApi_v4));
 
   try {
-    await client.post('/orders/?format=json', mappedOrder);
+    const res = await client.post('/orders/?format=json', mappedOrder);
     logger.info('res');
+    logger.info(res);
   } catch (error: any) {
+    logger.error(JSON.stringify(error));
     if (error.response) {
       const {
         response: { status },

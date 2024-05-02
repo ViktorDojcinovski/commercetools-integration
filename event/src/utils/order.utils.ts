@@ -4,6 +4,7 @@ import { Axios } from 'axios';
 import { createApiRoot } from '../client/create.client';
 import {
   Order,
+  Resource,
   LineItem,
   LocalizedString,
   OrderControllerResponse,
@@ -22,6 +23,7 @@ import { readConfiguration } from './config.utils';
  */
 const executeOrderProcess = async (
   order: Order,
+  resource: Resource,
   client: Axios
 ): Promise<OrderControllerResponse> => {
   const { lineItems } = order;
@@ -45,8 +47,8 @@ const executeOrderProcess = async (
   });
   const mappedOrder = mapOrder(
     order,
+    resource,
     supplierRestID,
-    `aditional_ref${(Math.random() * 1000).toFixed()}`,
     extendedProductsDescriptions as LocalizedString[]
   );
 
@@ -91,8 +93,10 @@ const executeOrderProcess = async (
             };
           } catch (error: any) {
             logger.info('after 401');
+            logger.info('mappedOrder');
             logger.info(JSON.stringify(mappedOrder));
-            logger.info(JSON.stringify(error.response.data.error));
+            logger.info('error.response');
+            logger.info(JSON.stringify(error.response.data));
             // throw new CustomError(
             //   status,
             //   'Failed to refresh the token and to process the order'
@@ -130,8 +134,8 @@ const executeOrderProcess = async (
 
 const mapOrder = (
   order: Order,
+  resource: Resource,
   supplierRestID: string,
-  additionalOrderReference: string,
   extendedProductsDescriptions: LocalizedString[]
 ) => {
   const {
@@ -158,7 +162,7 @@ const mapOrder = (
     supplier: supplierRestID,
     order_reference: id,
     order_date: createdAt,
-    additional_order_reference: additionalOrderReference,
+    additional_order_reference: resource.id,
     end_user_purchase_order_reference: createdBy.user.id,
     shipping_store_number: store.key,
     test_flag: false,
@@ -168,7 +172,9 @@ const mapOrder = (
         retailer_sku_reference: item.variant.sku,
         line_reference: item.productId,
         name: item.name['en-GB'],
-        description: extendedProductsDescriptions[i]['en-GB'].substring(0, 255),
+        description:
+          extendedProductsDescriptions[i]['en-GB'].substring(0, 255) ||
+          'Description unavailable.',
         quantity: item.quantity,
         unit_cost_price: (item.totalPrice.centAmount / 100).toFixed(2),
         subtotal: ((item.totalPrice.centAmount / 100) * item.quantity).toFixed(

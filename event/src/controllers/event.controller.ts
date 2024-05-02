@@ -66,7 +66,11 @@ const processOrder = async (request: Request, response: Response) => {
   });
 
   try {
-    const data = await executeOrderProcess(order, virtualStockApiClient);
+    const data = await executeOrderProcess(
+      order,
+      resource,
+      virtualStockApiClient
+    );
 
     if (data && data.statusCode === 200) {
       response.status(data.statusCode);

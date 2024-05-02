@@ -168,6 +168,11 @@ export type LineItem = {
   taxedPricePortions: any[];
 };
 
+export type Resource = {
+  typeId: string;
+  id: string;
+};
+
 export type Order = {
   type: string;
   id: string;

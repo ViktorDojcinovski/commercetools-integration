@@ -1,4 +1,5 @@
 import axios from 'axios';
+import axiosRetry from 'axios-retry';
 
 interface ICLient {
   baseURL: string;
@@ -15,6 +16,7 @@ export default ({ baseURL, headers, auth }: ICLient) => {
     headers,
     auth,
   });
+  axiosRetry(client, { retries: 3 });
 
   return client;
 };

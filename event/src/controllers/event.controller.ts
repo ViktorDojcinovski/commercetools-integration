@@ -1,61 +1,30 @@
-import { Request, Response } from 'express';
-
-import CustomError from '../errors/custom.error';
 import axiosClient from '../api/axios-client.api';
 import { executeOrderProcess } from '../utils/order.utils';
 import { readConfiguration } from '../utils/config.utils';
 import { logger } from '../utils/logger.utils';
+import { publishMessage } from '../utils/pubSubClient.utils';
 
 /**
  * Exposed event POST endpoint.
  * Receives the Pub/Sub message and works with it
  *
- * @param {Request} request The express request
- * @param {Response} response The express response
+ * @param {string} message The message received from Pub/Sub
  * @returns
  */
-const processOrder = async (request: Request, response: Response) => {
-  // Check request body
-  if (!request.body) {
-    logger.error('Missing request body.');
-    // throw new CustomError(400, 'Bad request: No Pub/Sub message was received');
+const processOrder = async (message: string) => {
+  if (!message) {
+    logger.info('No message received.');
+    await publishMessage('No message recived!');
     return;
   }
 
-  // Check if the body comes in a message
-  if (!request.body.message) {
-    logger.error('Missing body message');
-    // throw new CustomError(400, 'Bad request: Wrong No Pub/Sub message format');
-    return;
-  }
-
-  const { body } = request;
-  const orderCreatedMessage = body.message;
-
-  const decodedData = orderCreatedMessage.data
-    ? Buffer.from(orderCreatedMessage.data, 'base64').toString().trim()
-    : undefined;
-
-  if (!decodedData) {
-    throw new CustomError(400, 'Bad input data.');
-  }
-
-  const { resource, order } = JSON.parse(decodedData);
-
-  logger.info('resource');
-  logger.info(JSON.stringify(resource));
-  logger.info('order');
-  logger.info(JSON.stringify(order));
+  const { resource, order } = JSON.parse(message);
 
   if (resource.typeId !== 'order') {
-    // throw new CustomError(400, `Bad request. Allowed value is 'order'.`);
+    logger.info('Incorrect type.');
+    await publishMessage('The only allowed type is order!');
     return;
   }
-
-  logger.info('vsApi_v4');
-  logger.info(JSON.stringify(readConfiguration().vsApi_v4));
-  logger.info('process.env.AUTH_TOKEN');
-  logger.info(process.env.AUTH_TOKEN);
 
   const virtualStockApiClient = axiosClient({
     baseURL: readConfiguration().vsApi_v4 as string,
@@ -65,27 +34,7 @@ const processOrder = async (request: Request, response: Response) => {
     },
   });
 
-  try {
-    const data = await executeOrderProcess(
-      order,
-      resource,
-      virtualStockApiClient
-    );
-
-    if (data && data.statusCode === 200) {
-      response.status(data.statusCode);
-      return;
-    }
-  } catch (error: any) {
-    logger.info('inside catch block inside controller');
-    if (error instanceof Error) {
-      throw new CustomError(
-        (error as CustomError).statusCode || 500,
-        error.message,
-        (error as CustomError).errors
-      );
-    }
-  }
+  await executeOrderProcess(order, resource, virtualStockApiClient);
 };
 
 export { processOrder };

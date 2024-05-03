@@ -7,11 +7,11 @@ import {
   Resource,
   LineItem,
   LocalizedString,
-  OrderControllerResponse,
 } from '../types/order.types';
 import { refreshToken } from '../utils/refreshToken.utils';
 import { logger } from '../utils/logger.utils';
 import { readConfiguration } from './config.utils';
+import { publishMessage } from '../utils/pubSubClient.utils';
 
 /**
  * Executes the process of network request to
@@ -19,24 +19,21 @@ import { readConfiguration } from './config.utils';
  *
  * @param {Order} order The Order object
  * @param {Axios} client The axios client
- * @returns {Promise<OrderControllerResponse>} OrderControllerResponse
  */
 const executeOrderProcess = async (
   order: Order,
   resource: Resource,
   client: Axios
-): Promise<OrderControllerResponse> => {
+) => {
   const { lineItems } = order;
 
-  logger.info('lineItems');
-  logger.info(JSON.stringify(lineItems));
-
-  if (!lineItems[0].variant.availability.channels) {
-    logger.info('inside if-block when no lineItems channel property');
-    // throw new CustomError(400, 'A product must have an inventory!');
-    return {
-      statusCode: 200,
-    };
+  if (
+    !lineItems[0].variant.availability ||
+    !lineItems[0].variant.availability.channels
+  ) {
+    logger.info('One or more line items are missing channel(supplier)');
+    await publishMessage('A product must have an inventory!');
+    return;
   }
   const supplierRestID = await mapChannel(
     Object.keys(lineItems[0].variant.availability.channels)[0]
@@ -52,18 +49,10 @@ const executeOrderProcess = async (
     extendedProductsDescriptions as LocalizedString[]
   );
 
-  logger.info('mappedOrder');
-  logger.info(JSON.stringify(mappedOrder));
-  logger.info(JSON.stringify(readConfiguration()));
-  logger.info('vsApi_v4');
-  logger.info(JSON.stringify(readConfiguration().vsApi_v4));
-
   try {
-    const res = await client.post('/orders/?format=json', mappedOrder);
-    logger.info('res');
-    logger.info(res);
+    await client.post('/orders/?format=json', mappedOrder);
+    await publishMessage('Order processed successfully');
   } catch (error: any) {
-    logger.error(JSON.stringify(error));
     if (error.response) {
       const {
         response: { status },
@@ -71,65 +60,31 @@ const executeOrderProcess = async (
 
       switch (status) {
         case 500:
-          logger.info(500);
-          logger.info(JSON.stringify(mappedOrder));
-          logger.info(JSON.stringify(error.response.data.error));
-          // throw new CustomError(
-          //   500,
-          //   'Failed to process the order.',
-          //   error.response.data.error
-          // );
-          return {
-            statusCode: 200,
-          };
+          await publishMessage('Failed to process the order.');
+          return;
         case 401: {
           logger.info('...refreshing token');
           try {
             const updatedClient = await refreshToken(client);
             await updatedClient.post('/orders/?format=json', mappedOrder);
-
-            return {
-              statusCode: 200,
-            };
+            await publishMessage('Order processed successfully');
+            return;
           } catch (error: any) {
-            logger.info('after 401');
-            logger.info('mappedOrder');
-            logger.info(JSON.stringify(mappedOrder));
-            logger.info('error.response');
-            logger.info(JSON.stringify(error.response.data));
-            // throw new CustomError(
-            //   status,
-            //   'Failed to refresh the token and to process the order'
-            // );
-            return {
-              statusCode: 200,
-            };
+            await publishMessage(
+              'Failed to refresh token and process the order.'
+            );
+            return;
           }
         }
         default:
-          logger.info('default');
-          logger.info(JSON.stringify(error.response.data.error));
-          // throw new CustomError(status, error.response.data.error);
-          return {
-            statusCode: 200,
-          };
+          await publishMessage('Failed to process the order. Try again later.');
+          return;
       }
     } else {
-      logger.info('else');
-      logger.info(JSON.stringify(mappedOrder));
-      // throw new CustomError(
-      //   500,
-      //   'Internal server error. Please try again later.'
-      // );
-      return {
-        statusCode: 200,
-      };
+      await publishMessage('Failed to process the order. Try again later.');
+      return;
     }
   }
-
-  return {
-    statusCode: 200,
-  };
 };
 
 const mapOrder = (
@@ -148,15 +103,6 @@ const mapOrder = (
     lineItems,
     store,
   } = order;
-
-  logger.info('infamous id');
-  logger.info(id);
-  logger.info('store.key');
-  logger.info(JSON.stringify(store));
-  logger.info('shipingInfo');
-  logger.info(JSON.stringify(shippingInfo));
-  logger.info('shippingAddress');
-  logger.info(JSON.stringify(shippingAddress));
 
   return {
     supplier: supplierRestID,
@@ -194,7 +140,7 @@ const mapOrder = (
       postal_code: shippingAddress.postalCode,
       email: customerEmail,
       country: shippingAddress.country,
-      phone: shippingAddress.mobile || '',
+      phone: shippingAddress.mobile || shippingAddress.phone || '',
     },
   };
 };
@@ -207,14 +153,10 @@ const mapChannel = async (channelId: string) => {
     .get()
     .execute();
 
-  logger.info('channel');
-  logger.info(JSON.stringify(channel.body));
-
   return `${readConfiguration().edgeApi_v4}/suppliers/${channel.body.key}/`;
 };
 
 const getExtendedProducts = async (lineItems: LineItem[]) => {
-  logger.info('inside getExtendedProducts');
   const extendedProductsPromises = lineItems.map((lineItem) => {
     return createApiRoot()
       .products()
@@ -227,8 +169,6 @@ const getExtendedProducts = async (lineItems: LineItem[]) => {
   const extendedProductsData = extendedProducts.map(
     (exProduct) => exProduct.body
   );
-  logger.info('extendedProductsData');
-  logger.info(JSON.stringify(extendedProductsData));
 
   return extendedProductsData;
 };

@@ -1,5 +1,3 @@
-import { UpdateAction } from '@commercetools/sdk-client-v2';
-
 type Price = {
   type: string;
   currencyCode: string;
@@ -62,6 +60,7 @@ type Address = {
   state: string;
   country: string;
   mobile: string;
+  phone: string;
 };
 
 export type LocalizedString = {
@@ -211,12 +210,6 @@ export type Order = {
   itemShippingAddresses: any[];
   refusedGifts: any[];
   store: any;
-};
-
-export type OrderControllerResponse = {
-  statusCode: number;
-  message?: string;
-  actions?: UpdateAction[];
 };
 
 export type Message = {

@@ -211,13 +211,3 @@ export type Order = {
   refusedGifts: any[];
   store: any;
 };
-
-export type Message = {
-  typeId: string;
-  obj: Order;
-};
-
-export type RequestBody = {
-  message: Message;
-  action: string;
-};

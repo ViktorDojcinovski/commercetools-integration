@@ -11,6 +11,9 @@ eventRouter.post(
   '/',
   async (req: Request, res: Response, next: NextFunction) => {
     logger.info(JSON.stringify(req.body));
+    logger.info('req.body.message.data');
+    logger.info(req.body.message.data);
+    logger.info(Buffer.from(req.body.message.data, 'base64').toString().trim());
     try {
       const message = JSON.parse(
         Buffer.from(req.body.message.data, 'base64').toString().trim()
@@ -21,18 +24,13 @@ eventRouter.post(
         await publishMessage('No message recived!');
         return;
       }
-      const parsedMessage = JSON.parse(message);
-      logger.info('Message received.');
-      logger.info(JSON.stringify(parsedMessage));
-      const resource = parsedMessage.resource;
+      const { resource, order } = message;
 
       if (resource.typeId !== 'order') {
         logger.info('Incorrect type.');
         await publishMessage('The only allowed type is order!');
         return;
       }
-
-      const order = parsedMessage.order;
 
       await processOrder(order, resource);
       logger.info('Order processed successfully.');

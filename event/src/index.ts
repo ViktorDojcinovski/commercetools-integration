@@ -39,8 +39,6 @@ const start = async () => {
 
     process.env.AUTH_TOKEN = response.data.access;
     process.env.REFRESH_TOKEN = response.data.refresh;
-    logger.info('process.env.AUTH_TOKEN');
-    logger.info(process.env.AUTH_TOKEN);
   }
 
   app.listen(PORT, () => {

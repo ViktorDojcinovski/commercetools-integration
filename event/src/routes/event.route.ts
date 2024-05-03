@@ -3,7 +3,7 @@ import { Router, Request, Response, NextFunction } from 'express';
 import { logger } from '../utils/logger.utils';
 import { processOrder } from '../controllers/event.controller';
 import CustomError from '../errors/custom.error';
-import { publishMessage } from '../utils/pubSubClient.utils';
+// import { publishMessage } from '../utils/pubSubClient.utils';
 
 const eventRouter = Router();
 
@@ -21,14 +21,14 @@ eventRouter.post(
 
       if (!message) {
         logger.info('No message received.');
-        await publishMessage('No message recived!');
+        // await publishMessage('No message recived!');
         return;
       }
       const { resource, order } = message;
 
       if (resource.typeId !== 'order') {
         logger.info('Incorrect type.');
-        await publishMessage('The only allowed type is order!');
+        // await publishMessage('The only allowed type is order!');
         return res.status(200).send();
       }
 

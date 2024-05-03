@@ -11,7 +11,7 @@ import {
 import { refreshToken } from '../utils/refreshToken.utils';
 import { logger } from '../utils/logger.utils';
 import { readConfiguration } from './config.utils';
-import { publishMessage } from '../utils/pubSubClient.utils';
+// import { publishMessage } from '../utils/pubSubClient.utils';
 
 /**
  * Executes the process of network request to
@@ -32,7 +32,7 @@ const executeOrderProcess = async (
     !lineItems[0].variant.availability.channels
   ) {
     logger.info('One or more line items are missing channel(supplier)');
-    await publishMessage('A product must have an inventory!');
+    // await publishMessage('A product must have an inventory!');
     return;
   }
   const supplierRestID = await mapChannel(
@@ -50,8 +50,9 @@ const executeOrderProcess = async (
   );
 
   try {
+    logger.info('inside try');
     await client.post('/orders/?format=json', mappedOrder);
-    await publishMessage('Order processed successfully');
+    // await publishMessage('Order processed successfully');
   } catch (error: any) {
     if (error.response) {
       const {
@@ -60,28 +61,28 @@ const executeOrderProcess = async (
 
       switch (status) {
         case 500:
-          await publishMessage('Failed to process the order.');
+          // await publishMessage('Failed to process the order.');
           return;
         case 401: {
           logger.info('...refreshing token');
           try {
             const updatedClient = await refreshToken(client);
             await updatedClient.post('/orders/?format=json', mappedOrder);
-            await publishMessage('Order processed successfully');
+            // await publishMessage('Order processed successfully');
             return;
           } catch (error: any) {
-            await publishMessage(
-              'Failed to refresh token and process the order.'
-            );
+            // await publishMessage(
+            //   'Failed to refresh token and process the order.'
+            // );
             return;
           }
         }
         default:
-          await publishMessage('Failed to process the order. Try again later.');
+          // await publishMessage('Failed to process the order. Try again later.');
           return;
       }
     } else {
-      await publishMessage('Failed to process the order. Try again later.');
+      // await publishMessage('Failed to process the order. Try again later.');
       return;
     }
   }

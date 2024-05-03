@@ -29,7 +29,7 @@ eventRouter.post(
       if (resource.typeId !== 'order') {
         logger.info('Incorrect type.');
         await publishMessage('The only allowed type is order!');
-        return;
+        return res.status(200).send();
       }
 
       await processOrder(order, resource);

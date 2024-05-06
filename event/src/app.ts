@@ -6,7 +6,6 @@ import bodyParser from 'body-parser';
 import EventRoutes from './routes/event.route';
 
 import { readConfiguration } from './utils/config.utils';
-import { errorMiddleware } from './middleware/error.middleware';
 
 dotenv.config();
 
@@ -23,8 +22,5 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 // Define routes
 app.use('/event', EventRoutes);
-
-// Global error handler
-app.use(errorMiddleware);
 
 export { app };

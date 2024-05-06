@@ -50,8 +50,8 @@ const executeOrderProcess = async (
   );
 
   try {
-    logger.info('inside try');
     await client.post('/orders/?format=json', mappedOrder);
+    logger.info('Order processed succesfully');
     // await publishMessage('Order processed successfully');
   } catch (error: any) {
     if (error.response) {
@@ -60,29 +60,19 @@ const executeOrderProcess = async (
       } = error;
 
       switch (status) {
-        case 500:
-          // await publishMessage('Failed to process the order.');
-          return;
         case 401: {
           logger.info('...refreshing token');
-          try {
-            const updatedClient = await refreshToken(client);
-            await updatedClient.post('/orders/?format=json', mappedOrder);
-            // await publishMessage('Order processed successfully');
-            return;
-          } catch (error: any) {
-            // await publishMessage(
-            //   'Failed to refresh token and process the order.'
-            // );
-            return;
-          }
+          const updatedClient = await refreshToken(client);
+          await updatedClient.post('/orders/?format=json', mappedOrder);
+          logger.info('Order processed succesfully');
+          return;
         }
         default:
-          // await publishMessage('Failed to process the order. Try again later.');
+          logger.info('Unexpected error occured.');
           return;
       }
     } else {
-      // await publishMessage('Failed to process the order. Try again later.');
+      logger.info('Unexpected error occured.');
       return;
     }
   }

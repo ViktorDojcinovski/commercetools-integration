@@ -28,6 +28,9 @@ export const createApiRoot = ((root?: ByProjectKeyRequestBuilder) => () => {
  *
  * @returns {Promise<ClientResponse<Project>>} apiRoot
  */
-export const getProject = async () => {
-  return await createApiRoot().get().execute();
+export const getProject = async (
+  createApiRootCallback: () => ByProjectKeyRequestBuilder
+) => {
+  const apiRoot = createApiRootCallback();
+  return await apiRoot.get().execute();
 };

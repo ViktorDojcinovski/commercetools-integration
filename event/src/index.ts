@@ -7,7 +7,7 @@ import { readConfiguration } from './utils/config.utils';
 
 const PORT = process.env.PORT || 8080;
 
-const start = async () => {
+export const start = async () => {
   const properties = new Map(Object.entries(process.env));
   logger.info('env vars');
   logger.info(JSON.stringify(properties));

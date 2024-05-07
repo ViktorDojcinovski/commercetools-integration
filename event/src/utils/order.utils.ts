@@ -11,7 +11,6 @@ import {
 import { refreshToken } from '../utils/refreshToken.utils';
 import { logger } from '../utils/logger.utils';
 import { readConfiguration } from './config.utils';
-// import { publishMessage } from '../utils/pubSubClient.utils';
 
 /**
  * Executes the process of network request to
@@ -32,7 +31,6 @@ const executeOrderProcess = async (
     !lineItems[0].variant.availability.channels
   ) {
     logger.info('One or more line items are missing channel(supplier)');
-    // await publishMessage('A product must have an inventory!');
     return;
   }
   const supplierRestID = await mapChannel(
@@ -52,7 +50,6 @@ const executeOrderProcess = async (
   try {
     await client.post('/orders/?format=json', mappedOrder);
     logger.info('Order processed succesfully');
-    // await publishMessage('Order processed successfully');
   } catch (error: any) {
     if (error.response) {
       const {

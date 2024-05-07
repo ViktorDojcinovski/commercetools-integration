@@ -2,7 +2,6 @@ import { Router, Request, Response } from 'express';
 
 import { logger } from '../utils/logger.utils';
 import { processOrder } from '../controllers/event.controller';
-// import { publishMessage } from '../utils/pubSubClient.utils';
 
 const eventRouter = Router();
 

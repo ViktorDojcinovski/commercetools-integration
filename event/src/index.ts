@@ -8,9 +8,6 @@ import { readConfiguration } from './utils/config.utils';
 const PORT = process.env.PORT || 8080;
 
 export const start = async () => {
-  const properties = new Map(Object.entries(process.env));
-  logger.info('env vars');
-  logger.info(JSON.stringify(properties));
   const { vsApi_v4, vsUsername, vsPassword } = readConfiguration();
 
   if (!vsUsername || !vsPassword) {

@@ -21,7 +21,7 @@ eventRouter.post('/', async (req: Request, res: Response) => {
     logger.info('Order processed successfully.');
     return res.status(200).send();
   } catch (error) {
-    logger.info('Incorect message received.');
+    logger.info(JSON.stringify(error));
     return res.status(200).send();
   }
 });

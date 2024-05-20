@@ -95,7 +95,7 @@ const mapOrder = (
     supplier: supplierRestID,
     order_reference: id,
     order_date: createdAt,
-    additional_order_reference: resource.id,
+    additional_order_reference: resource.typeId,
     end_user_purchase_order_reference: createdBy.user.id,
     shipping_store_number: store.key,
     test_flag: false,
@@ -133,7 +133,6 @@ const mapOrder = (
 };
 
 const mapChannel = async (channelId: string) => {
-  logger.info('inside mapChannel');
   const channel = await createApiRoot()
     .channels()
     .withId({ ID: channelId })

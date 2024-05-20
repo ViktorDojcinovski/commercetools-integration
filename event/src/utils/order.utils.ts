@@ -1,6 +1,5 @@
 import { Axios } from 'axios';
 
-// import CustomError from '../errors/custom.error';
 import { createApiRoot } from '../client/create.client';
 import {
   Order,

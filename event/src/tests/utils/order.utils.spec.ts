@@ -10,9 +10,7 @@ import { logger } from '../../utils/logger.utils';
 import { refreshToken } from '../../utils/refreshToken.utils';
 
 jest.mock('axios');
-jest.mock('../../client/create.client', () => {
-  return jest.requireActual('../../__mocks__/createApiRoot');
-});
+jest.mock('../../client/create.client');
 jest.mock('../../utils/refreshToken.utils');
 jest.mock('../../utils/config.utils', () => ({
   readConfiguration: jest.fn().mockReturnValue({

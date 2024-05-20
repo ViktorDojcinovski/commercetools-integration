@@ -122,7 +122,7 @@ describe('mapOrder util function', () => {
       supplier: `https://www.sandbox.the-edge.io/restapi/v4/suppliers/1569/`,
       order_reference: order.id,
       order_date: order.createdAt,
-      additional_order_reference: resource.id,
+      additional_order_reference: resource.typeId,
       end_user_purchase_order_reference: order.createdBy.user.id,
       shipping_store_number: order.store.key,
       test_flag: false,

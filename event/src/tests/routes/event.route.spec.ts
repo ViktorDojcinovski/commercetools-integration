@@ -44,7 +44,7 @@ describe('Event', () => {
         message: { data: '' },
       });
 
-    expect(logger.info).toHaveBeenCalledTimes(1);
+    expect(logger.info).toHaveBeenCalledTimes(2);
     expect(logger.info).toHaveBeenCalledWith('Incorect message received.');
     expect(response.status).toBe(200);
   });

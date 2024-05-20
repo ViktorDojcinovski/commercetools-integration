@@ -11,7 +11,9 @@ export const start = async () => {
   const { vsApi_v4, vsUsername, vsPassword } = readConfiguration();
 
   if (!vsUsername || !vsPassword) {
-    logger.error('Missing environment variables');
+    logger.error(
+      'Missing environment variables: CTP_VS_USERNAME or CTP_VS_PASSWORD'
+    );
     process.exit(1);
   }
   const virtualStockClient = axiosClient({

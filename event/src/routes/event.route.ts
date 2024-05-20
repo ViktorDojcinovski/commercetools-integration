@@ -22,6 +22,7 @@ eventRouter.post('/', async (req: Request, res: Response) => {
     return res.status(200).send();
   } catch (error) {
     logger.info(JSON.stringify(error));
+    logger.info('Incorect message received.');
     return res.status(200).send();
   }
 });

@@ -11,7 +11,9 @@ eventRouter.post('/', async (req: Request, res: Response) => {
       Buffer.from(req.body.message.data, 'base64').toString().trim()
     );
     const { resource, order } = message;
-
+    logger.info(`Received message: ${JSON.stringify(message)}`);
+    logger.info(`Resource: ${JSON.stringify(resource)}`);
+    logger.info(`Order: ${JSON.stringify(order)}`);
     if (resource.typeId !== 'order') {
       logger.info('Incorrect type.');
       return res.status(200).send();

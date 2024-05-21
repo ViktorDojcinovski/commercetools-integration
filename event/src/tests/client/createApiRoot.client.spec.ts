@@ -21,7 +21,6 @@ describe('createApiRoot', () => {
   });
 
   test('should create apiRoot by invoking createApiBuilderFromCtpClient', async () => {
-    // Call the function you want to test
     createApiRoot();
 
     expect(createApiBuilderFromCtpClient).toHaveBeenCalled();

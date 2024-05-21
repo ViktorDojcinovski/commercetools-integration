@@ -5,7 +5,6 @@ import { order } from '../_stubs/order';
 import { resource } from '../_stubs/resource';
 import { executeOrderProcess, mapOrder } from '../../utils/order.utils';
 import { Order } from '../../types/order.types';
-// import { refreshToken } from '../../utils/refreshToken.utils';
 import { logger } from '../../utils/logger.utils';
 import { refreshToken } from '../../utils/refreshToken.utils';
 

@@ -3,7 +3,6 @@ import request from 'supertest';
 
 import { app } from '../../app';
 import { logger } from '../../utils/logger.utils';
-// import { order } from '../_stubs/order';
 import { message } from '../_stubs/message';
 
 jest.mock('axios');

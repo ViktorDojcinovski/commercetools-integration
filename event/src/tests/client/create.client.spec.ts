@@ -35,7 +35,7 @@ describe('createApiRoot', () => {
 
   test('should return existing apiRoot', () => {
     const existingApiRoot = {};
-    // Mock the return value of createApiRoot
+
     (createApiRoot as jest.Mock).mockReturnValue(existingApiRoot);
 
     const apiRoot = createApiRoot();
@@ -48,7 +48,7 @@ describe('getProject', () => {
     const mockExecute = jest.fn();
     const mockGet = jest.fn().mockReturnValue({ execute: mockExecute });
     const mockApiRoot = { get: mockGet };
-    // Mock the return value of createApiRoot
+
     (createApiRoot as jest.Mock).mockReturnValue(mockApiRoot);
     await getProject(createApiRoot);
 

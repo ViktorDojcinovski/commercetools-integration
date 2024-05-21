@@ -1,4 +1,5 @@
 import { Router, Request, Response } from 'express';
+import ip from 'ip';
 
 import { logger } from '../utils/logger.utils';
 import { processOrder } from '../controllers/event.controller';
@@ -6,6 +7,7 @@ import { processOrder } from '../controllers/event.controller';
 const eventRouter = Router();
 
 eventRouter.post('/', async (req: Request, res: Response) => {
+  logger.info('Local IP address:', ip.address());
   try {
     const message = JSON.parse(
       Buffer.from(req.body.message.data, 'base64').toString().trim()

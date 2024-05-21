@@ -58,6 +58,7 @@ const executeOrderProcess = async (
       const {
         response: { status },
       } = error;
+      logger.info(`Error status: ${status}`);
       logger.info(`Error response: ${JSON.stringify(error.response)}`);
       switch (status) {
         case 401: {

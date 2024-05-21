@@ -14,11 +14,9 @@ deployAs:
         - key: CTP_VIRTUALSTOCK_API_V4
           description: Virtualstock Api v4 url
           required: true
-          default: "https://api.sandbox.virtualstock.com/restapi/v4"
         - key: CTP_EDGE_API_V4
           description: Edge platform Api v4 url
           required: true
-          default: "https://www.sandbox.the-edge.io/restapi/v4"
       securedConfiguration:
         - key: CTP_PROJECT_KEY
           description: commercetools Composable Commerce project key

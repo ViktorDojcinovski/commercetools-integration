@@ -54,7 +54,7 @@ const executeOrderProcess = async (
       const {
         response: { status },
       } = error;
-      logger.info(`Error status: ${JSON.stringify(status)}`);
+      logger.info(`Error response: ${JSON.stringify(error.response)}`);
       switch (status) {
         case 401: {
           logger.info('...refreshing token');

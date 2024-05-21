@@ -2,6 +2,7 @@ import axiosClient from '../api/axios-client.api';
 import { executeOrderProcess } from '../utils/order.utils';
 import { readConfiguration } from '../utils/config.utils';
 import { Order, Resource } from '../types/order.types';
+import { logger } from '../utils/logger.utils';
 
 /**
  * Exposed event POST endpoint.
@@ -19,7 +20,7 @@ const processOrder = async (order: Order, resource: Resource) => {
       Authorization: `Bearer ${process.env.AUTH_TOKEN}`,
     },
   });
-
+  logger.info('Processing order...');
   await executeOrderProcess(order, resource, virtualStockApiClient);
 };
 

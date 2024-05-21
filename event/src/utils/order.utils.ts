@@ -24,6 +24,7 @@ const executeOrderProcess = async (
   client: Axios
 ) => {
   const { lineItems } = order;
+  logger.info(`Line items ${JSON.stringify(lineItems)}`);
 
   if (
     !lineItems[0].variant.availability ||
@@ -35,6 +36,7 @@ const executeOrderProcess = async (
   const supplierRestID = await mapChannel(
     Object.keys(lineItems[0].variant.availability.channels)[0]
   );
+  logger.info(`Supplier REST ID: ${JSON.stringify(supplierRestID)}`);
   const extendedProducts = await getExtendedProducts(lineItems);
   const extendedProductsDescriptions = extendedProducts.map((product) => {
     return product.masterData.current.description ?? '';
@@ -45,7 +47,9 @@ const executeOrderProcess = async (
     supplierRestID,
     extendedProductsDescriptions as LocalizedString[]
   );
-
+  logger.info(
+    `Sending order to Virtualstock... ${JSON.stringify(mappedOrder)}`
+  );
   try {
     await client.post('/orders/?format=json', mappedOrder);
     logger.info('Order processed succesfully');
